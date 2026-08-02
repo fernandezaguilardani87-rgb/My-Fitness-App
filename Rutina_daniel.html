@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dieta — Daniel</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #0F1E30;
+  --surface: #162840;
+  --surface2: #1A3050;
+  --border: #1E3A54;
+  --border2: #2A5070;
+  --text: #E8EDF2;
+  --text2: #C8D8E8;
+  --muted: #6B8AAA;
+  --accent: #2D6FA8;
+  --accent2: #5AADDF;
+  --green: #3FC87A;
+  --green-bg: #0F3028;
+  --green-border: #1A5040;
+  --yellow: #8AB040;
+  --yellow-bg: #1E2810;
+  --orange: #E8943A;
+  --orange-bg: #2A1A08;
+  --red: #E85A5A;
+  --radius: 10px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* NAV */
+.nav {
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  overflow-x: auto;
+}
+.nav-btn {
+  flex: 1;
+  min-width: 60px;
+  padding: 12px 6px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.nav-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+.nav-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+
+/* VIEWS */
+.view { display: none; padding: 1rem; }
+.view.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+/* NEXT MEAL */
+.next-meal-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.badge-desayuno { background: #1A2A4A; color: var(--accent2); }
+.badge-almuerzo { background: #1E2810; color: var(--yellow); }
+.badge-merienda { background: #2A1A08; color: var(--orange); }
+.badge-cena { background: #1A3050; color: #8ABADF; }
+.badge-batido { background: var(--green-bg); color: var(--green); }
+
+.next-meal-time { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.next-meal-name { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 10px; line-height: 1.2; }
+.next-meal-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.meal-macros { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.macro-pill {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+}
+.macro-prot { background: #0F3028; color: var(--green); border-color: var(--green-border); }
+.macro-hc { background: #1E2810; color: var(--yellow); border-color: #2E4020; }
+.macro-kcal { background: #1A2A4A; color: var(--accent2); border-color: #2A4070; }
+
+/* MEALS LIST */
+.meal-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--surface2);
+}
+.meal-row:last-child { border-bottom: none; }
+.meal-time-col { min-width: 52px; font-size: 12px; color: var(--muted); padding-top: 2px; }
+.meal-content { flex: 1; }
+.meal-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.meal-detail { font-size: 12px; color: var(--muted); }
+.meal-check {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  background: transparent; cursor: pointer;
+  flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.meal-check.done { background: var(--green); border-color: var(--green); }
+.check-tick { display: none; width: 10px; height: 6px; border-bottom: 2px solid white; border-left: 2px solid white; transform: rotate(-45deg) translateY(-1px); }
+.meal-check.done .check-tick { display: block; }
+
+/* PROTEIN BAR */
+.progress-wrap { margin-top: 8px; }
+.progress-bg { background: var(--surface2); border-radius: 20px; height: 6px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 20px; transition: width 0.3s; }
+.progress-fill.prot { background: var(--green); }
+.progress-fill.water { background: var(--accent); }
+.progress-label { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; justify-content: space-between; }
+
+/* WATER */
+.water-grid { display: grid; grid-template-columns: repeat(auto-fill, 44px); gap: 8px; margin-top: 8px; }
+.bottle-btn {
+  width: 44px; height: 56px; border-radius: 8px;
+  border: 1.5px solid var(--border2);
+  background: var(--surface2);
+  cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  transition: all 0.15s; font-size: 20px;
+}
+.bottle-btn.filled { background: #1A3A5C; border-color: var(--accent2); }
+.bottle-btn.filled .bottle-label { color: var(--accent2); }
+.bottle-label { font-size: 9px; color: var(--muted); }
+.water-target { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
+/* WEIGHT */
+.weight-form { display: flex; gap: 8px; margin-bottom: 12px; }
+.weight-input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px;
+  color: var(--text); font-size: 16px; outline: none;
+}
+.weight-input:focus { border-color: var(--accent); }
+.btn-primary {
+  padding: 10px 16px; background: var(--accent); border: none;
+  border-radius: var(--radius); color: white; font-size: 14px;
+  font-weight: 500; cursor: pointer;
+}
+.weight-entry { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--surface2); }
+.weight-entry:last-child { border-bottom: none; }
+.weight-date { font-size: 13px; color: var(--muted); }
+.weight-val { font-size: 16px; font-weight: 600; color: var(--text); }
+.weight-avg { text-align: center; padding: 12px; background: var(--surface2); border-radius: var(--radius); margin-bottom: 12px; }
+.weight-avg-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.weight-avg-val { font-size: 28px; font-weight: 600; color: var(--accent2); margin-top: 2px; }
+
+/* SUPPLEMENTS */
+.supp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.supp-btn {
+  padding: 10px; border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface2); cursor: pointer;
+  text-align: left; transition: all 0.15s;
+}
+.supp-btn.done { background: var(--green-bg); border-color: var(--green-border); }
+.supp-name { font-size: 13px; color: var(--text2); font-weight: 500; }
+.supp-dose { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.supp-btn.done .supp-name { color: var(--green); }
+
+/* TRAINING NOTE */
+.training-input {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px;
+  color: var(--text); font-size: 14px; outline: none;
+  resize: none; min-height: 80px; font-family: inherit;
+}
+.training-input:focus { border-color: var(--accent); }
+.btn-save { width: 100%; padding: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--muted); font-size: 13px; cursor: pointer; margin-top: 8px; }
+.btn-save:active { background: var(--accent); color: white; }
+
+/* DAY SELECTOR */
+.day-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; }
+.day-tab { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 12px; cursor: pointer; white-space: nowrap; }
+.day-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* TODAY BADGE */
+.today-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.today-label { font-size: 18px; font-weight: 600; }
+.today-type { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.type-entreno { background: #1A3A5C; color: var(--accent2); }
+.type-descanso { background: var(--surface2); color: var(--muted); }
+
+/* GRAPH */
+.graph { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-top: 8px; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--accent); min-height: 4px; transition: height 0.3s; }
+.bar-day { font-size: 9px; color: var(--muted); }
+.bar-val { font-size: 9px; color: var(--text2); }
+
+/* RESET */
+.btn-reset { padding: 6px 12px; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 11px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showView('home')"><span class="nav-icon">🍽️</span>Hoy</button>
+  <button class="nav-btn" onclick="showView('dieta')"><span class="nav-icon">📋</span>Dieta</button>
+  <button class="nav-btn" onclick="showView('agua')"><span class="nav-icon">💧</span>Agua</button>
+  <button class="nav-btn" onclick="showView('peso')"><span class="nav-icon">⚖️</span>Peso</button>
+  <button class="nav-btn" onclick="showView('supl')"><span class="nav-icon">💊</span>Supl.</button>
+</nav>
+
+<!-- HOME: PRÓXIMA COMIDA -->
+<div id="view-home" class="view active">
+  <div id="today-header" class="today-header">
+    <div>
+      <div class="today-label" id="today-date">—</div>
+      <div style="font-size:13px;color:var(--muted)" id="today-day-name">—</div>
+    </div>
+    <div class="today-type" id="today-type-badge">—</div>
+  </div>
+
+  <div class="card" id="next-meal-card">
+    <div class="card-title">Próxima comida</div>
+    <div class="next-meal-badge" id="nm-badge">—</div>
+    <div class="next-meal-time" id="nm-time">—</div>
+    <div class="next-meal-name" id="nm-name">—</div>
+    <div class="next-meal-desc" id="nm-desc">—</div>
+    <div class="meal-macros" id="nm-macros"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Proteína hoy</div>
+    <div class="progress-wrap">
+      <div class="progress-bg"><div class="progress-fill prot" id="prot-bar" style="width:0%"></div></div>
+      <div class="progress-label"><span id="prot-done">0g</span><span>165g objetivo</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Seguimiento del día</div>
+    <div id="today-meals-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Nota de entreno</div>
+    <textarea class="training-input" id="training-note" placeholder="Ej: Press banca 55kg · Remo 60kg · Dominadas 10 rep..."></textarea>
+    <button class="btn-save" onclick="saveNote()">Guardar nota</button>
+  </div>
+</div>
+
+<!-- DIETA SEMANAL -->
+<div id="view-dieta" class="view">
+  <div class="day-tabs" id="day-tabs"></div>
+  <div id="dieta-content"></div>
+</div>
+
+<!-- AGUA -->
+<div id="view-agua" class="view">
+  <div class="card">
+    <div class="card-title">Agua hoy</div>
+    <div class="water-target" id="water-target-label">Objetivo: — botellas (— litros)</div>
+    <div class="water-grid" id="water-grid"></div>
+    <div class="progress-wrap" style="margin-top:12px">
+      <div class="progress-bg"><div class="progress-fill water" id="water-bar" style="width:0%"></div></div>
+      <div class="progress-label"><span id="water-done">0L</span><span id="water-goal-label">— objetivo</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Distribución recomendada</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8">
+      🌅 Al despertar — 500ml<br>
+      ☕ Con el desayuno — 300ml<br>
+      🕙 Media mañana — 400ml<br>
+      🍽️ Con el almuerzo — 300ml<br>
+      🕓 Media tarde — 400ml<br>
+      💪 Pre-entreno (sal+limón) — 300ml<br>
+      🏋️ Durante entreno — 400ml<br>
+      🚿 Post-entreno — 300ml<br>
+      🌙 Con la cena — 300ml<br>
+      😴 Antes de dormir — 200ml
+    </div>
+  </div>
+</div>
+
+<!-- PESO -->
+<div id="view-peso" class="view">
+  <div class="card">
+    <div class="card-title">Registrar peso</div>
+    <div class="weight-form">
+      <input class="weight-input" id="weight-input" type="number" step="0.1" placeholder="75.2" />
+      <button class="btn-primary" onclick="addWeight()">+</button>
+    </div>
+    <div id="weight-avg-wrap"></div>
+    <div class="card-title" style="margin-top:8px">Historial</div>
+    <div id="weight-list"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Evolución semanal</div>
+    <div class="graph" id="weight-graph"></div>
+  </div>
+</div>
+
+<!-- SUPLEMENTOS -->
+<div id="view-supl" class="view">
+  <div class="card">
+    <div class="card-title">Suplementos de hoy</div>
+    <div class="supp-grid" id="supp-grid"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Recordatorio</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8">
+      🌅 <b style="color:var(--text)">Vitamina D3+K2</b> — con el desayuno<br>
+      💪 <b style="color:var(--text)">Creatina</b> — con desayuno, pre y post entreno<br>
+      🌙 <b style="color:var(--text)">Magnesio</b> — 2 cápsulas 1h antes de dormir<br>
+      🦠 <b style="color:var(--text)">Yovis IBS</b> — mañana en ayunas<br>
+      🫙 <b style="color:var(--text)">Gelsectan</b> — con desayuno y cena
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+const MEALS = {
+  lunes: [
+    { id:'l1', hora:'08:30', tipo:'desayuno', nombre:'Overnight Oats', desc:'Avena 80g · Kéfir 150ml · Leche sin lactosa 80ml · Plátano · Nueces 20g · Almendras 15g · Arándanos 80g · Canela', prot:25, hc:85, kcal:650 },
+    { id:'l2', hora:'13:30', tipo:'almuerzo', nombre:'Pollo al ajillo con arroz', desc:'Pechuga de pollo 220g dorada con ajo laminado · Arroz blanco 120g · Aceite de oliva, perejil, pimienta', prot:52, hc:95, kcal:780 },
+    { id:'l3', hora:'17:00', tipo:'merienda', nombre:'Yogur griego con plátano y nueces', desc:'Yogur griego sin lactosa 200g · Plátano en rodajas · Nueces 20g', prot:18, hc:32, kcal:300 },
+    { id:'l4', hora:'21:00', tipo:'cena', nombre:'Tortilla de atún con tomate', desc:'Huevos 4ud · Atún 2 latas escurridas · Pimiento rojo asado · Tomate en rodajas con aceite y sal', prot:52, hc:10, kcal:560 },
+    { id:'l5', hora:'23:00', tipo:'batido', nombre:'Batido de proteína', desc:'Proteína en polvo 30g con leche sin lactosa 200ml', prot:28, hc:10, kcal:220 },
+  ],
+  martes: [
+    { id:'ma1', hora:'08:30', tipo:'desayuno', nombre:'Overnight Oats', desc:'Avena 80g · Kéfir 150ml · Leche sin lactosa 80ml · Plátano · Nueces 20g · Almendras 15g · Arándanos 80g · Canela', prot:25, hc:85, kcal:650 },
+    { id:'ma2', hora:'13:30', tipo:'almuerzo', nombre:'Pasta con caballa, aceitunas y tomate cherry', desc:'Pasta 120g · Caballa en lata 2 latas · Tomate cherry salteado con ajo · Aceitunas negras 30g · Albahaca', prot:46, hc:94, kcal:720 },
+    { id:'ma3', hora:'17:00', tipo:'merienda', nombre:'Ensalada de huevo con atún', desc:'Huevos cocidos 2ud en cuartos · Atún 1 lata · Tomate · Lechuga · Aceite de oliva y limón', prot:28, hc:8, kcal:280 },
+    { id:'ma4', hora:'21:00', tipo:'cena', nombre:'Arroz salteado con pavo estilo wok', desc:'Solomillo de pavo 180g en tiras · Arroz 100g · Zanahoria, pimiento, cebolla · Salsa de soja sin gluten', prot:46, hc:72, kcal:620 },
+    { id:'ma5', hora:'23:00', tipo:'batido', nombre:'Batido de proteína + plátano', desc:'Proteína 25g con leche sin lactosa · Plátano', prot:25, hc:35, kcal:285 },
+  ],
+  miercoles: [
+    { id:'mi1', hora:'08:30', tipo:'desayuno', nombre:'Overnight Oats', desc:'Avena 80g · Kéfir 150ml · Leche sin lactosa 80ml · Plátano · Nueces 20g · Almendras 15g · Arándanos 80g · Canela', prot:25, hc:85, kcal:650 },
+    { id:'mi2', hora:'13:30', tipo:'almuerzo', nombre:'Solomillo de pavo con patatas panaderas', desc:'Solomillo de pavo 220g a la plancha · Patatas 200g en rodajas al horno con cebolla, romero y tomillo · Ensalada de lechuga y tomate', prot:55, hc:72, kcal:820 },
+    { id:'mi3', hora:'17:00', tipo:'merienda', nombre:'Kéfir con plátano y almendras', desc:'Kéfir 200ml · Plátano 1ud · Almendras 20g', prot:12, hc:38, kcal:280 },
+    { id:'mi4', hora:'21:00', tipo:'cena', nombre:'Revuelto de huevos con espinacas y atún', desc:'Huevos 4ud · Atún 2 latas · Espinacas 80g salteadas con ajo · Tomate en rodajas · Pimentón', prot:50, hc:8, kcal:520 },
+    { id:'mi5', hora:'23:00', tipo:'batido', nombre:'Batido de proteína', desc:'Proteína 30g con leche sin lactosa 200ml', prot:28, hc:10, kcal:220 },
+  ],
+  jueves: [
+    { id:'j1', hora:'08:30', tipo:'desayuno', nombre:'Overnight Oats', desc:'Avena 80g · Kéfir 150ml · Leche sin lactosa 80ml · Plátano · Nueces 20g · Almendras 15g · Arándanos 80g · Canela', prot:25, hc:85, kcal:650 },
+    { id:'j2', hora:'13:30', tipo:'almuerzo', nombre:'Lentejas guisadas con pavo', desc:'Lentejas cocidas bote 200g · Solomillo de pavo 150g en dados · Zanahoria, tomate triturado, cebolla · Comino, pimentón ahumado, laurel', prot:52, hc:65, kcal:680 },
+    { id:'j3', hora:'17:00', tipo:'merienda', nombre:'Ensalada de atún con aguacate', desc:'Atún 2 latas · Aguacate medio en dados · Tomate maduro · Limón, aceite de oliva, perejil', prot:28, hc:10, kcal:320 },
+    { id:'j4', hora:'21:00', tipo:'cena', nombre:'Pollo al limón con arroz basmati', desc:'Pechuga de pollo 200g marinada con limón, ajo y romero · Arroz basmati 100g · Ensalada ligera', prot:48, hc:75, kcal:620 },
+    { id:'j5', hora:'23:00', tipo:'batido', nombre:'Batido de proteína', desc:'Proteína 25g con leche sin lactosa 200ml', prot:25, hc:8, kcal:185 },
+  ],
+  viernes: [
+    { id:'v1', hora:'08:30', tipo:'desayuno', nombre:'Overnight Oats', desc:'Avena 80g · Kéfir 150ml · Leche sin lactosa 80ml · Plátano · Nueces 20g · Almendras 15g · Arándanos 80g · Canela', prot:25, hc:85, kcal:650 },
+    { id:'v2', hora:'13:30', tipo:'almuerzo', nombre:'Pasta con pollo, tomate fresco y albahaca', desc:'Pasta 120g · Pechuga de pollo 200g en tiras · Tomate maduro en dados · Ajo, aceite de oliva · Albahaca fresca abundante', prot:52, hc:92, kcal:760 },
+    { id:'v3', hora:'17:00', tipo:'merienda', nombre:'Yogur griego con arándanos y nueces', desc:'Yogur griego sin lactosa 200g · Arándanos 80g · Nueces 25g', prot:16, hc:20, kcal:290 },
+    { id:'v4', hora:'21:00', tipo:'cena', nombre:'Garbanzos salteados con huevo', desc:'Garbanzos bote 200g · Huevos 3ud · Pimiento rojo, cebolla, tomate triturado · Pimentón ahumado, comino · Huevos cuajados directamente en la sartén', prot:38, hc:52, kcal:560 },
+    { id:'v5', hora:'23:00', tipo:'batido', nombre:'Batido de proteína', desc:'Proteína 30g con leche sin lactosa 200ml', prot:28, hc:10, kcal:220 },
+  ],
+  sabado: [
+    { id:'s1', hora:'08:30', tipo:'desayuno', nombre:'Overnight Oats', desc:'Avena 80g · Kéfir 150ml · Leche sin lactosa 80ml · Plátano · Nueces 20g · Almendras 15g · Arándanos 80g · Canela', prot:25, hc:85, kcal:650 },
+    { id:'s2', hora:'13:30', tipo:'almuerzo', nombre:'Arroz con caballa estilo mediterráneo', desc:'Arroz 120g · Caballa 2 latas · Tomate triturado, cebolla, pimiento verde, aceitunas 30g · Pimentón, cúrcuma · Arroz meloso con el jugo de la caballa', prot:46, hc:88, kcal:750 },
+    { id:'s3', hora:'17:00', tipo:'merienda', nombre:'Huevos rellenos de atún', desc:'Huevos cocidos 3ud partidos · Yemas mezcladas con atún 1 lata, tomate en dados, limón y aceite · Rellenar las claras', prot:28, hc:4, kcal:280 },
+    { id:'s4', hora:'21:00', tipo:'cena', nombre:'Tortilla de patatas Mercadona + ensalada', desc:'Tortilla de patatas Mercadona ración generosa · Ensalada de lechuga, tomate, zanahoria, pimiento · Aceite de oliva, vinagre', prot:28, hc:42, kcal:520 },
+    { id:'s5', hora:'23:00', tipo:'batido', nombre:'Batido de proteína', desc:'Proteína 25g con leche sin lactosa 200ml', prot:25, hc:8, kcal:185 },
+  ],
+  domingo: [
+    { id:'do1', hora:'08:30', tipo:'desayuno', nombre:'Overnight Oats', desc:'Avena 80g · Kéfir 150ml · Leche sin lactosa 80ml · Plátano · Nueces 20g · Almendras 15g · Arándanos 80g · Canela', prot:25, hc:85, kcal:650 },
+    { id:'do2', hora:'13:30', tipo:'almuerzo', nombre:'Día flexible — elige tu plato favorito', desc:'Elige cualquier almuerzo de la semana que te apetezca repetir. Prioriza proteína alta y evita fritos y salsas pesadas.', prot:48, hc:80, kcal:720 },
+    { id:'do3', hora:'17:00', tipo:'merienda', nombre:'Yogur griego con fruta', desc:'Yogur griego sin lactosa 200g · Plátano o fruta de temporada · Nueces o almendras', prot:16, hc:30, kcal:280 },
+    { id:'do4', hora:'21:00', tipo:'cena', nombre:'Cena ligera — huevos o ensalada', desc:'Tortilla de 3-4 huevos con tomate · O ensalada completa con atún · O yogur griego si no tienes hambre', prot:35, hc:15, kcal:420 },
+  ],
+};
+
+const DAY_KEYS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+const ENTRENO_DAYS = [0,1,2,3,4]; // lun-vie son entreno
+const WATER_ENTRENO = 7; // 3.5L = 7 botellas
+const WATER_DESCANSO = 6; // 3L = 6 botellas
+
+const SUPPS = [
+  { id:'vit', name:'Vitamina D3+K2', dose:'Con desayuno' },
+  { id:'cre', name:'Creatina', dose:'3 tomas al día' },
+  { id:'mag', name:'Magnesio', dose:'2 cáps · 1h antes dormir' },
+  { id:'yov', name:'Yovis IBS', dose:'Mañana en ayunas' },
+  { id:'gel', name:'Gelsectan', dose:'Con desayuno y cena' },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+function getState() {
+  try { return JSON.parse(localStorage.getItem('dieta_state') || '{}'); } catch(e) { return {}; }
+}
+
+function setState(s) {
+  localStorage.setItem('dieta_state', JSON.stringify(s));
+}
+
+function getTodayDayIndex() {
+  let d = new Date().getDay(); // 0=sun
+  return d === 0 ? 6 : d - 1; // mon=0 ... sun=6
+}
+
+function isEntrenoDia(idx) {
+  return ENTRENO_DAYS.includes(idx);
+}
+
+// ── VIEWS ─────────────────────────────────────────────────────────────────────
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  const idx = ['home','dieta','agua','peso','supl'].indexOf(v);
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────────────
+function renderHome() {
+  const now = new Date();
+  const dayIdx = getTodayDayIndex();
+  const dayKey = DAY_KEYS[dayIdx];
+  const meals = MEALS[dayKey];
+  const entreno = isEntrenoDia(dayIdx);
+  const s = getState();
+  const tk = todayKey();
+
+  // Date header
+  const days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('today-date').textContent = `${now.getDate()} de ${months[now.getMonth()]}`;
+  document.getElementById('today-day-name').textContent = DIAS[dayIdx];
+  const tb = document.getElementById('today-type-badge');
+  tb.textContent = entreno ? '💪 Entreno' : '😴 Descanso';
+  tb.className = 'today-type ' + (entreno ? 'type-entreno' : 'type-descanso');
+
+  // Next meal
+  const hm = now.getHours() * 60 + now.getMinutes();
+  let next = null;
+  for (const m of meals) {
+    const [mh, mm] = m.hora.split(':').map(Number);
+    if (mh * 60 + mm > hm) { next = m; break; }
+  }
+  if (!next) next = meals[0]; // wrap to tomorrow's first
+
+  const badgeEl = document.getElementById('nm-badge');
+  badgeEl.textContent = next.tipo.charAt(0).toUpperCase() + next.tipo.slice(1);
+  badgeEl.className = 'next-meal-badge badge-' + next.tipo;
+  document.getElementById('nm-time').textContent = next.hora + 'h';
+  document.getElementById('nm-name').textContent = next.nombre;
+  document.getElementById('nm-desc').textContent = next.desc;
+  document.getElementById('nm-macros').innerHTML =
+    `<span class="macro-pill macro-kcal">🔥 ${next.kcal} kcal</span>
+     <span class="macro-pill macro-prot">💪 ${next.prot}g prot</span>
+     <span class="macro-pill macro-hc">⚡ ${next.hc}g HC</span>`;
+
+  // Today meals list
+  const done = (s[tk] && s[tk].meals) ? s[tk].meals : [];
+  let protDone = 0;
+  let html = '';
+  for (const m of meals) {
+    const isDone = done.includes(m.id);
+    if (isDone) protDone += m.prot;
+    html += `<div class="meal-row">
+      <div class="meal-time-col">${m.hora}</div>
+      <div class="meal-content">
+        <div class="meal-name">${m.nombre}</div>
+        <div class="meal-detail">${m.prot}g prot · ${m.kcal} kcal</div>
+      </div>
+      <button class="meal-check ${isDone ? 'done' : ''}" onclick="toggleMeal('${m.id}')">
+        <div class="check-tick"></div>
+      </button>
+    </div>`;
+  }
+  document.getElementById('today-meals-list').innerHTML = html;
+
+  // Protein bar
+  const pct = Math.min(100, Math.round(protDone / 165 * 100));
+  document.getElementById('prot-bar').style.width = pct + '%';
+  document.getElementById('prot-done').textContent = protDone + 'g';
+
+  // Training note
+  const note = (s[tk] && s[tk].note) ? s[tk].note : '';
+  document.getElementById('training-note').value = note;
+}
+
+function toggleMeal(id) {
+  const s = getState();
+  const tk = todayKey();
+  if (!s[tk]) s[tk] = {};
+  if (!s[tk].meals) s[tk].meals = [];
+  const idx = s[tk].meals.indexOf(id);
+  if (idx === -1) s[tk].meals.push(id);
+  else s[tk].meals.splice(idx, 1);
+  setState(s);
+  renderHome();
+}
+
+function saveNote() {
+  const s = getState();
+  const tk = todayKey();
+  if (!s[tk]) s[tk] = {};
+  s[tk].note = document.getElementById('training-note').value;
+  setState(s);
+  const btn = document.querySelector('.btn-save');
+  btn.textContent = '✓ Guardado';
+  setTimeout(() => btn.textContent = 'Guardar nota', 1500);
+}
+
+// ── DIETA ─────────────────────────────────────────────────────────────────────
+let selectedDayIdx = getTodayDayIndex();
+
+function renderDieta() {
+  // Tabs
+  let tabs = '';
+  DIAS.forEach((d, i) => {
+    const isToday = i === getTodayDayIndex();
+    tabs += `<button class="day-tab ${i === selectedDayIdx ? 'active' : ''}" onclick="selectDietaDay(${i})">${d}${isToday ? ' ·' : ''}</button>`;
+  });
+  document.getElementById('day-tabs').innerHTML = tabs;
+
+  // Meals
+  const key = DAY_KEYS[selectedDayIdx];
+  const meals = MEALS[key];
+  const entreno = isEntrenoDia(selectedDayIdx);
+  let totalProt = 0, totalKcal = 0;
+  let html = '';
+
+  for (const m of meals) {
+    totalProt += m.prot;
+    totalKcal += m.kcal;
+    html += `<div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span class="next-meal-badge badge-${m.tipo}">${m.tipo.charAt(0).toUpperCase()+m.tipo.slice(1)}</span>
+        <span style="font-size:13px;color:var(--muted)">${m.hora}h</span>
+      </div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px">${m.nombre}</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px">${m.desc}</div>
+      <div class="meal-macros">
+        <span class="macro-pill macro-kcal">🔥 ${m.kcal} kcal</span>
+        <span class="macro-pill macro-prot">💪 ${m.prot}g prot</span>
+        <span class="macro-pill macro-hc">⚡ ${m.hc}g HC</span>
+      </div>
+    </div>`;
+  }
+
+  html += `<div class="card" style="background:var(--surface2)">
+    <div class="card-title">Total del día</div>
+    <div class="meal-macros">
+      <span class="macro-pill macro-kcal">🔥 ${totalKcal} kcal</span>
+      <span class="macro-pill macro-prot">💪 ${totalProt}g prot</span>
+      <span class="macro-pill" style="background:var(--surface);color:var(--accent2)">💧 ${entreno ? '3.5L' : '3L'} agua</span>
+    </div>
+  </div>`;
+
+  document.getElementById('dieta-content').innerHTML = html;
+}
+
+function selectDietaDay(i) {
+  selectedDayIdx = i;
+  renderDieta();
+}
+
+// ── AGUA ──────────────────────────────────────────────────────────────────────
+function renderAgua() {
+  const s = getState();
+  const tk = todayKey();
+  const dayIdx = getTodayDayIndex();
+  const entreno = isEntrenoDia(dayIdx);
+  const target = entreno ? WATER_ENTRENO : WATER_DESCANSO;
+  const filled = (s[tk] && s[tk].water) ? s[tk].water : 0;
+
+  document.getElementById('water-target-label').textContent =
+    `Objetivo: ${target} botellas (${target * 0.5}L) · Hoy es día de ${entreno ? 'entreno' : 'descanso'}`;
+
+  let grid = '';
+  for (let i = 0; i < target; i++) {
+    const done = i < filled;
+    grid += `<button class="bottle-btn ${done ? 'filled' : ''}" onclick="toggleBottle(${i})">
+      💧<span class="bottle-label">${(i+1)*0.5}L</span>
+    </button>`;
+  }
+  document.getElementById('water-grid').innerHTML = grid;
+
+  const pct = Math.min(100, Math.round(filled / target * 100));
+  document.getElementById('water-bar').style.width = pct + '%';
+  document.getElementById('water-done').textContent = (filled * 0.5).toFixed(1) + 'L';
+  document.getElementById('water-goal-label').textContent = (target * 0.5) + 'L objetivo';
+}
+
+function toggleBottle(i) {
+  const s = getState();
+  const tk = todayKey();
+  if (!s[tk]) s[tk] = {};
+  const cur = s[tk].water || 0;
+  s[tk].water = (i < cur) ? i : i + 1;
+  setState(s);
+  renderAgua();
+}
+
+// ── PESO ──────────────────────────────────────────────────────────────────────
+function renderPeso() {
+  const s = getState();
+  const weights = s.weights || [];
+
+  // Average last 7
+  const last7 = weights.slice(-7);
+  let avgHtml = '';
+  if (last7.length > 0) {
+    const avg = (last7.reduce((a,b) => a + b.val, 0) / last7.length).toFixed(1);
+    avgHtml = `<div class="weight-avg">
+      <div class="weight-avg-label">Media semanal</div>
+      <div class="weight-avg-val">${avg} kg</div>
+    </div>`;
+  }
+  document.getElementById('weight-avg-wrap').innerHTML = avgHtml;
+
+  // List
+  const listHtml = [...weights].reverse().slice(0, 14).map(w =>
+    `<div class="weight-entry">
+      <span class="weight-date">${w.date}</span>
+      <span class="weight-val">${w.val} kg</span>
+    </div>`
+  ).join('');
+  document.getElementById('weight-list').innerHTML = listHtml || '<div style="color:var(--muted);font-size:13px;padding:8px 0">Sin registros aún</div>';
+
+  // Graph
+  const graphData = last7;
+  if (graphData.length > 0) {
+    const min = Math.min(...graphData.map(w => w.val));
+    const max = Math.max(...graphData.map(w => w.val));
+    const range = max - min || 1;
+    const graphHtml = graphData.map(w => {
+      const h = Math.max(8, Math.round(((w.val - min) / range) * 60) + 8);
+      const dayName = w.date.slice(8,10);
+      return `<div class="bar-wrap">
+        <div class="bar-val">${w.val}</div>
+        <div class="bar" style="height:${h}px"></div>
+        <div class="bar-day">${dayName}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('weight-graph').innerHTML = graphHtml;
+  } else {
+    document.getElementById('weight-graph').innerHTML = '<div style="color:var(--muted);font-size:13px">Sin datos aún</div>';
+  }
+}
+
+function addWeight() {
+  const val = parseFloat(document.getElementById('weight-input').value);
+  if (isNaN(val) || val < 40 || val > 150) return;
+  const s = getState();
+  if (!s.weights) s.weights = [];
+  const today = todayKey();
+  const existing = s.weights.findIndex(w => w.date === today);
+  if (existing >= 0) s.weights[existing].val = val;
+  else s.weights.push({ date: today, val });
+  setState(s);
+  document.getElementById('weight-input').value = '';
+  renderPeso();
+}
+
+// ── SUPLEMENTOS ───────────────────────────────────────────────────────────────
+function renderSupl() {
+  const s = getState();
+  const tk = todayKey();
+  const done = (s[tk] && s[tk].supps) ? s[tk].supps : [];
+  let html = '';
+  for (const sp of SUPPS) {
+    const isDone = done.includes(sp.id);
+    html += `<button class="supp-btn ${isDone ? 'done' : ''}" onclick="toggleSupp('${sp.id}')">
+      <div class="supp-name">${isDone ? '✓ ' : ''}${sp.name}</div>
+      <div class="supp-dose">${sp.dose}</div>
+    </button>`;
+  }
+  document.getElementById('supp-grid').innerHTML = html;
+}
+
+function toggleSupp(id) {
+  const s = getState();
+  const tk = todayKey();
+  if (!s[tk]) s[tk] = {};
+  if (!s[tk].supps) s[tk].supps = [];
+  const idx = s[tk].supps.indexOf(id);
+  if (idx === -1) s[tk].supps.push(id);
+  else s[tk].supps.splice(idx, 1);
+  setState(s);
+  renderSupl();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderHome();
+renderDieta();
+renderAgua();
+renderPeso();
+renderSupl();
+</script>
+</body>
+</html>
+<!-- PATCH: inject training tab and view -->
+<script>
+// ── TRAINING DATA ──────────────────────────────────────────────────────────────
+const TRAINING = {
+  lunes: {
+    nombre: 'Upper A — Empuje + Tirón Horizontal',
+    tipo: 'upper',
+    grupos: 'Pecho · Espalda · Hombro · Bíceps · Tríceps',
+    bloques: [
+      { label: 'Compuestos', ejercicios: [
+        { id:'la1', nombre:'Press banca plano', series:'4', reps:'6-8', rir:'2', nota:'Baja controlado 3 seg, explota arriba' },
+        { id:'la2', nombre:'Remo con barra', series:'4', reps:'6-8', rir:'2', nota:'Codos pegados al cuerpo, pecho al frente' },
+        { id:'la3', nombre:'Press inclinado mancuernas', series:'3', reps:'8-10', rir:'2', nota:'30-45° de inclinación' },
+      ]},
+      { label: 'Accesorios', ejercicios: [
+        { id:'la4', nombre:'Remo en polea baja', series:'3', reps:'15-20', rir:'—', nota:'Pausa 1 seg al contraer' },
+        { id:'la5', nombre:'Press militar mancuernas', series:'3', reps:'8-10', rir:'2', nota:'No bloquees los codos arriba' },
+        { id:'la6', nombre:'Curl bíceps barra', series:'3', reps:'15-20', rir:'—', nota:'Codos fijos, sin balanceo' },
+        { id:'la7', nombre:'Tríceps en polea cuerda', series:'3', reps:'15-20', rir:'—', nota:'Separa la cuerda al final' },
+      ]},
+      { label: 'Postura', ejercicios: [
+        { id:'la8', nombre:'Face pulls polea', series:'3', reps:'15-20', rir:'—', nota:'Lleva la cuerda a la frente, codos arriba' },
+        { id:'la9', nombre:'Retracción escapular', series:'3', reps:'15', rir:'—', nota:'Aguanta 2 seg cada repetición' },
+      ]},
+    ]
+  },
+  martes: {
+    nombre: 'Lower A — Cuádriceps Dominante',
+    tipo: 'lower',
+    grupos: 'Piernas · Core · Cardio',
+    bloques: [
+      { label: 'Piernas', ejercicios: [
+        { id:'ma1', nombre:'Sentadilla goblet mancuerna', series:'3', reps:'10-12', rir:'2', nota:'Talones en el suelo, pecho erguido' },
+        { id:'ma2', nombre:'Prensa', series:'3', reps:'12-15', rir:'2', nota:'No bloquees las rodillas al extender' },
+        { id:'ma3', nombre:'Extensión cuádriceps', series:'3', reps:'15-20', rir:'—', nota:'Pausa 1 seg arriba' },
+        { id:'ma4', nombre:'Curl femoral tumbado', series:'3', reps:'15-20', rir:'—', nota:'Movimiento controlado en bajada' },
+        { id:'ma5', nombre:'Elevación talones de pie', series:'3', reps:'20', rir:'—', nota:'Pausa arriba, baja despacio' },
+      ]},
+      { label: 'Core', ejercicios: [
+        { id:'ma6', nombre:'Plancha frontal', series:'3', reps:'40s', rir:'—', nota:'Glúteos apretados, no hundas las caderas' },
+        { id:'ma7', nombre:'Crunch en polea', series:'3', reps:'15-20', rir:'—', nota:'Redondea la espalda, no tires del cuello' },
+        { id:'ma8', nombre:'Plancha lateral', series:'2', reps:'30s c/l', rir:'—', nota:'Cadera alta, cuerpo recto' },
+      ]},
+      { label: 'Cardio', ejercicios: [
+        { id:'ma9', nombre:'Cinta o bicicleta moderado', series:'1', reps:'20 min', rir:'—', nota:'Intensidad que permita mantener conversación' },
+      ]},
+    ]
+  },
+  miercoles: {
+    nombre: 'Upper C — Hombros + Brazos',
+    tipo: 'upper',
+    grupos: 'Deltoides · Bíceps · Tríceps',
+    bloques: [
+      { label: 'Hombros — protagonistas', ejercicios: [
+        { id:'mi1', nombre:'Press militar mancuernas', series:'4', reps:'8-10', rir:'2', nota:'El más importante del día — máxima concentración' },
+        { id:'mi2', nombre:'Elevaciones laterales mancuernas', series:'5', reps:'15-20', rir:'—', nota:'Codos ligeramente flexionados, no balancees' },
+        { id:'mi3', nombre:'Elevaciones laterales polea baja', series:'4', reps:'15-20', rir:'—', nota:'Tensión constante todo el recorrido' },
+        { id:'mi4', nombre:'Pájaro mancuernas', series:'3', reps:'15-20', rir:'—', nota:'Deltoides posterior — esencial para postura' },
+      ]},
+      { label: 'Brazos — complemento', ejercicios: [
+        { id:'mi5', nombre:'Curl bíceps barra', series:'4', reps:'15-20', rir:'—', nota:'Codos fijos' },
+        { id:'mi6', nombre:'Tríceps polea cuerda', series:'4', reps:'15-20', rir:'—', nota:'Separa bien la cuerda' },
+      ]},
+    ]
+  },
+  jueves: {
+    nombre: 'Lower B — Isquiotibial Dominante',
+    tipo: 'lower',
+    grupos: 'Piernas · Core · Cardio',
+    bloques: [
+      { label: 'Piernas', ejercicios: [
+        { id:'j1', nombre:'Peso muerto rumano mancuernas', series:'3', reps:'10-12', rir:'2', nota:'Espalda neutra, empuja cadera atrás' },
+        { id:'j2', nombre:'Zancadas con mancuernas', series:'3', reps:'12 c/l', rir:'2', nota:'Rodilla trasera cerca del suelo' },
+        { id:'j3', nombre:'Curl femoral sentado', series:'4', reps:'15-20', rir:'—', nota:'Pausa al contraer' },
+        { id:'j4', nombre:'Hip thrust peso corporal', series:'3', reps:'15', rir:'—', nota:'Aprieta glúteo en la cima 2 seg' },
+        { id:'j5', nombre:'Elevación talones sentado', series:'4', reps:'20', rir:'—', nota:'Rango completo de movimiento' },
+      ]},
+      { label: 'Core', ejercicios: [
+        { id:'j6', nombre:'Ab rueda de rodillas', series:'3', reps:'8-10', rir:'—', nota:'Espalda recta, no hundas los riñones' },
+        { id:'j7', nombre:'Elevación de piernas tumbado', series:'3', reps:'12-15', rir:'—', nota:'Baja controlado sin tocar el suelo' },
+        { id:'j8', nombre:'Dead bug', series:'3', reps:'8 c/l', rir:'—', nota:'Zona lumbar pegada al suelo' },
+      ]},
+      { label: 'Cardio', ejercicios: [
+        { id:'j9', nombre:'Cinta o bicicleta moderado', series:'1', reps:'20 min', rir:'—', nota:'Intensidad moderada' },
+      ]},
+    ]
+  },
+  viernes: {
+    nombre: 'Upper B — Empuje + Tirón Vertical',
+    tipo: 'upper',
+    grupos: 'Hombro · Espalda · Pecho · Bíceps · Tríceps',
+    bloques: [
+      { label: 'Compuestos', ejercicios: [
+        { id:'v1', nombre:'Press militar barra', series:'4', reps:'6-8', rir:'2', nota:'El rey del hombro — barra toca la clavícula' },
+        { id:'v2', nombre:'Dominadas o jalón polea', series:'4', reps:'6-8', rir:'2', nota:'Agarre prono ancho, pecho al frente' },
+        { id:'v3', nombre:'Press banca agarre cerrado', series:'3', reps:'8-10', rir:'2', nota:'Manos a anchura de hombros' },
+      ]},
+      { label: 'Accesorios', ejercicios: [
+        { id:'v4', nombre:'Remo en polea alta', series:'3', reps:'15-20', rir:'—', nota:'Codos hacia afuera y abajo' },
+        { id:'v5', nombre:'Elevaciones laterales', series:'5', reps:'15-20', rir:'—', nota:'Volumen extra de hombro — objetivo principal' },
+        { id:'v6', nombre:'Curl martillo', series:'4', reps:'15-20', rir:'—', nota:'Trabaja braquial — grosor del brazo' },
+        { id:'v7', nombre:'Fondos en paralelas', series:'3', reps:'8-10', rir:'2', nota:'Ligera inclinación hacia delante' },
+      ]},
+      { label: 'Postura', ejercicios: [
+        { id:'v8', nombre:'Face pulls polea', series:'4', reps:'15-20', rir:'—', nota:'Imprescindible — no te lo saltes' },
+      ]},
+    ]
+  },
+  sabado: { nombre: 'Descanso', tipo: 'rest', grupos: '', bloques: [] },
+  domingo: { nombre: 'Descanso', tipo: 'rest', grupos: '', bloques: [] },
+};
+
+// ── INJECT NAV TAB ────────────────────────────────────────────────────────────
+document.querySelector('.nav').innerHTML += `
+  <button class="nav-btn" onclick="showView('train')"><span class="nav-icon">🏋️</span>Entreno</button>
+`;
+
+// ── INJECT VIEW ───────────────────────────────────────────────────────────────
+const trainView = document.createElement('div');
+trainView.id = 'view-train';
+trainView.className = 'view';
+trainView.innerHTML = `
+  <div class="day-tabs" id="train-day-tabs"></div>
+  <div id="train-content"></div>
+`;
+document.body.insertBefore(trainView, document.body.lastElementChild);
+
+// ── PATCH showView ────────────────────────────────────────────────────────────
+const _origShowView = showView;
+window.showView = function(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('view-' + v);
+  if (el) el.classList.add('active');
+  const views = ['home','dieta','agua','peso','supl','train'];
+  const idx = views.indexOf(v);
+  const btns = document.querySelectorAll('.nav-btn');
+  if (btns[idx]) btns[idx].classList.add('active');
+  if (v === 'train') renderTrain();
+};
+
+// ── TRAIN RENDER ──────────────────────────────────────────────────────────────
+let selectedTrainDay = getTodayDayIndex();
+
+function renderTrain() {
+  const dayKey = DAY_KEYS[selectedTrainDay];
+  const session = TRAINING[dayKey];
+
+  // Tabs
+  let tabs = '';
+  DIAS.forEach((d, i) => {
+    const isToday = i === getTodayDayIndex();
+    tabs += `<button class="day-tab ${i === selectedTrainDay ? 'active' : ''}" onclick="selectTrainDay(${i})">${d}${isToday ? ' ·' : ''}</button>`;
+  });
+  document.getElementById('train-day-tabs').innerHTML = tabs;
+
+  if (session.tipo === 'rest') {
+    document.getElementById('train-content').innerHTML = `
+      <div class="card" style="text-align:center;padding:2rem">
+        <div style="font-size:32px;margin-bottom:12px">😴</div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:6px">Día de descanso</div>
+        <div style="font-size:13px;color:var(--muted)">El músculo crece mientras descansas.<br>Hidratación, sueño y magnesio.</div>
+      </div>`;
+    return;
+  }
+
+  const s = getState();
+  const tk = todayKey();
+  const doneKey = 'train_' + DAY_KEYS[selectedTrainDay];
+  const done = (s[tk] && s[tk][doneKey]) ? s[tk][doneKey] : [];
+
+  // Count total exercises
+  let totalEx = 0;
+  session.bloques.forEach(b => totalEx += b.ejercicios.length);
+  const doneCount = done.length;
+  const pct = Math.round(doneCount / totalEx * 100);
+
+  // Session header
+  const typeColor = session.tipo === 'upper' ? 'badge-almuerzo' : 'badge-merienda';
+  let html = `
+    <div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+        <div>
+          <span class="next-meal-badge ${typeColor}">${session.tipo.toUpperCase()}</span>
+          <div style="font-size:16px;font-weight:600;margin-top:6px">${session.nombre}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px">${session.grupos}</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bg"><div class="progress-fill" style="width:${pct}%;background:var(--yellow)"></div></div>
+        <div class="progress-label"><span>${doneCount} / ${totalEx} ejercicios</span><span>${pct}%</span></div>
+      </div>
+    </div>`;
+
+  // Blocks
+  session.bloques.forEach(bloque => {
+    html += `<div class="card">
+      <div class="card-title">${bloque.label}</div>`;
+    bloque.ejercicios.forEach(ex => {
+      const isDone = done.includes(ex.id);
+      html += `
+        <div class="meal-row" id="ex-${ex.id}">
+          <div class="meal-content">
+            <div class="meal-name" style="${isDone ? 'text-decoration:line-through;color:var(--muted)' : ''}">${ex.nombre}</div>
+            <div class="meal-detail">${ex.series} series · ${ex.reps} reps${ex.rir !== '—' ? ' · RIR ' + ex.rir : ''}</div>
+            <div style="font-size:11px;color:var(--accent2);margin-top:2px">💡 ${ex.nota}</div>
+            <input
+              class="training-input"
+              style="margin-top:6px;min-height:36px;padding:6px 10px;font-size:13px"
+              placeholder="Peso usado..."
+              value="${getExNote(ex.id)}"
+              oninput="saveExNote('${ex.id}', this.value)"
+            />
+          </div>
+          <button class="meal-check ${isDone ? 'done' : ''}" onclick="toggleEx('${ex.id}','${doneKey}')">
+            <div class="check-tick"></div>
+          </button>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+
+  // Session note
+  const sessionNote = getSessionNote(dayKey);
+  html += `
+    <div class="card">
+      <div class="card-title">Nota de la sesión</div>
+      <textarea class="training-input" placeholder="Observaciones, sensaciones, PRs..." style="min-height:70px"
+        oninput="saveSessionNote('${dayKey}', this.value)">${sessionNote}</textarea>
+    </div>`;
+
+  document.getElementById('train-content').innerHTML = html;
+}
+
+function selectTrainDay(i) {
+  selectedTrainDay = i;
+  renderTrain();
+}
+
+function toggleEx(exId, doneKey) {
+  const s = getState();
+  const tk = todayKey();
+  if (!s[tk]) s[tk] = {};
+  if (!s[tk][doneKey]) s[tk][doneKey] = [];
+  const idx = s[tk][doneKey].indexOf(exId);
+  if (idx === -1) s[tk][doneKey].push(exId);
+  else s[tk][doneKey].splice(idx, 1);
+  setState(s);
+  renderTrain();
+}
+
+function getExNote(exId) {
+  const s = getState();
+  return (s.ex_notes && s.ex_notes[exId]) ? s.ex_notes[exId] : '';
+}
+
+function saveExNote(exId, val) {
+  const s = getState();
+  if (!s.ex_notes) s.ex_notes = {};
+  s.ex_notes[exId] = val;
+  setState(s);
+}
+
+function getSessionNote(dayKey) {
+  const s = getState();
+  return (s.session_notes && s.session_notes[dayKey]) ? s.session_notes[dayKey] : '';
+}
+
+function saveSessionNote(dayKey, val) {
+  const s = getState();
+  if (!s.session_notes) s.session_notes = {};
+  s.session_notes[dayKey] = val;
+  setState(s);
+}
+
+// init train tab
+renderTrain();
+</script>
