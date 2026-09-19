@@ -2,442 +2,733 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Entrenamiento — Lean Bulk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Protocolo Dani</title>
 <style>
   :root{
+    box-sizing:border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     --bg:#0F1E30;
-    --bg-card:#152840;
-    --bg-card-2:#1B3049;
+    --card:#152840;
+    --card2:#1B3049;
     --accent:#4FA8E8;
-    --accent-soft:#2E6FA8;
+    --accent2:#2E6FA8;
     --text:#E8F0F8;
-    --text-dim:#8FA8C4;
+    --dim:#8FA8C4;
     --border:#233B58;
-    --good:#5FC98D;
+    --ok:#5FC98D;
+    --warn:#E8B04F;
+    --bad:#E86B6B;
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
+  *,*::before,*::after{box-sizing:inherit;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
   body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    padding:0 0 40px 0;
-    min-height:100vh;
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;line-height:1.5;padding-bottom:50px;
   }
   header{
-    padding:28px 20px 20px;
-    border-bottom:1px solid var(--border);
-    position:sticky;
-    top:0;
-    background:var(--bg);
-    z-index:10;
+    padding:18px 16px 12px;border-bottom:1px solid var(--border);
+    position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:20;
   }
-  header h1{
-    font-size:22px;
-    font-weight:700;
-    letter-spacing:-0.3px;
+  h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-0.3px;}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:3px;}
+  nav{
+    display:flex;gap:6px;padding:10px 16px 0;overflow-x:auto;
+    background:var(--bg);position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:19;
+    border-bottom:1px solid var(--border);padding-bottom:10px;
+    scrollbar-width:none;-ms-overflow-style:none;
   }
-  header p{
-    color:var(--text-dim);
-    font-size:13px;
-    margin-top:4px;
+  nav::-webkit-scrollbar{display:none;}
+  nav button{
+    flex:0 0 auto;background:var(--card);border:1px solid var(--border);color:var(--dim);
+    padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:600;
+    white-space:nowrap;cursor:pointer;font-family:inherit;
   }
-  .days-nav{
-    display:flex;
-    gap:8px;
-    padding:16px 20px 0;
-    overflow-x:auto;
-    scrollbar-width:none;
+  nav button.on{background:var(--accent2);border-color:var(--accent);color:#fff;}
+  main{padding:16px;max-width:820px;margin:0 auto;}
+  section{display:none;}
+  section.on{display:block;}
+  h2{font-size:16px;margin:0 0 3px;font-weight:700;}
+  h3{font-size:13px;margin:22px 0 9px;font-weight:700;text-transform:uppercase;
+     letter-spacing:.6px;color:var(--dim);}
+  .lead{color:var(--accent);font-size:12.5px;font-weight:600;margin-bottom:14px;}
+  .bar{height:5px;background:var(--card);border-radius:3px;overflow:hidden;margin:0 0 14px;}
+  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s;}
+  .item{
+    background:var(--card);border:1px solid var(--border);border-radius:11px;
+    padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;
   }
-  .days-nav::-webkit-scrollbar{display:none;}
-  .day-btn{
-    flex:0 0 auto;
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    color:var(--text-dim);
-    padding:10px 16px;
-    border-radius:10px;
-    font-size:13px;
-    font-weight:600;
-    white-space:nowrap;
-    cursor:pointer;
-    transition:all .15s ease;
+  .item .txt{flex:1;min-width:0;}
+  .item .nm{font-size:14.5px;font-weight:600;}
+  .item .dt{color:var(--dim);font-size:12.5px;margin-top:2px;}
+  .item .hint{color:var(--dim);font-size:11.5px;margin-top:5px;font-style:italic;line-height:1.45;}
+  .chk{
+    width:24px;height:24px;flex:0 0 24px;border-radius:7px;border:2px solid var(--border);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px;
+    background:transparent;padding:0;
   }
-  .day-btn.active{
-    background:var(--accent-soft);
-    border-color:var(--accent);
-    color:#fff;
+  .chk.done{background:var(--ok);border-color:var(--ok);}
+  .chk.done::after{content:"✓";color:#0F1E30;font-size:14px;font-weight:900;line-height:1;}
+  .wr{display:flex;align-items:center;gap:9px;margin-top:10px;padding-top:10px;
+      border-top:1px solid var(--border);flex-wrap:wrap;}
+  .wr label{font-size:11.5px;color:var(--dim);}
+  .wr input{
+    background:var(--card2);border:1px solid var(--border);color:var(--text);
+    border-radius:7px;padding:6px 9px;font-size:13.5px;width:84px;font-family:inherit;
   }
-  main{padding:20px;}
-  .day-title{
-    font-size:19px;
-    font-weight:700;
-    margin-bottom:2px;
+  .wr .ref{font-size:11px;color:var(--dim);font-style:italic;}
+  .note{
+    background:var(--card2);border:1px solid var(--accent2);border-radius:11px;
+    padding:13px 15px;font-size:13px;color:var(--dim);line-height:1.55;margin:14px 0;
   }
-  .day-subtitle{
-    color:var(--accent);
-    font-size:13px;
-    font-weight:600;
-    margin-bottom:18px;
+  .note b{color:var(--text);}
+  .note.warn{border-color:var(--warn);}
+  .note.bad{border-color:var(--bad);}
+  .tag{
+    display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;
+    border-radius:20px;margin-bottom:8px;letter-spacing:.3px;
   }
-  .exercise{
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:14px 16px;
-    margin-bottom:10px;
+  .tag.pre{background:var(--accent2);color:#fff;}
+  .tag.post{background:#3A5470;color:#fff;}
+  .tag.any{background:#2C4159;color:var(--dim);}
+  p{margin:0 0 11px;font-size:13.5px;color:var(--dim);line-height:1.6;}
+  p b, li b{color:var(--text);}
+  ul{margin:0 0 13px;padding-left:19px;}
+  li{font-size:13.5px;color:var(--dim);margin-bottom:6px;line-height:1.55;}
+  .phase-sel{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .phase-sel button{
+    background:var(--card);border:1px solid var(--border);color:var(--dim);
+    padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;
+    cursor:pointer;font-family:inherit;
   }
-  .exercise-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    cursor:pointer;
+  .phase-sel button.on{background:var(--accent2);border-color:var(--accent);color:#fff;}
+  .btn{
+    width:100%;background:transparent;border:1px solid var(--border);color:var(--dim);
+    padding:11px;border-radius:9px;font-size:12.5px;margin-top:18px;cursor:pointer;
+    font-family:inherit;
   }
-  .exercise-name{
-    font-size:15px;
-    font-weight:600;
+  .day-card{
+    background:var(--card);border:1px solid var(--border);border-radius:11px;
+    padding:14px;margin-bottom:10px;
   }
-  .exercise-scheme{
-    color:var(--text-dim);
-    font-size:12.5px;
-    margin-top:2px;
-  }
-  .check{
-    width:24px;
-    height:24px;
-    border-radius:7px;
-    border:2px solid var(--border);
-    flex:0 0 24px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:all .15s ease;
-  }
-  .check.done{
-    background:var(--good);
-    border-color:var(--good);
-  }
-  .check.done::after{
-    content:"✓";
-    color:#0F1E30;
-    font-size:14px;
-    font-weight:900;
-  }
-  .weight-row{
-    display:none;
-    margin-top:12px;
-    padding-top:12px;
-    border-top:1px solid var(--border);
-    align-items:center;
-    gap:10px;
-  }
-  .weight-row.open{display:flex;}
-  .weight-row input{
-    background:var(--bg-card-2);
-    border:1px solid var(--border);
-    color:var(--text);
-    border-radius:8px;
-    padding:8px 10px;
-    font-size:14px;
-    width:90px;
-  }
-  .weight-row label{
-    font-size:12px;
-    color:var(--text-dim);
-  }
-  .weight-row .ref{
-    margin-left:auto;
-    font-size:11.5px;
-    color:var(--text-dim);
-    font-style:italic;
-  }
-  .section-label{
-    font-size:12px;
-    text-transform:uppercase;
-    letter-spacing:0.6px;
-    color:var(--text-dim);
-    margin:22px 0 10px;
-    font-weight:700;
-  }
-  .note-card{
-    background:var(--bg-card-2);
-    border:1px solid var(--accent-soft);
-    border-radius:12px;
-    padding:14px 16px;
-    font-size:13px;
-    color:var(--text-dim);
-    line-height:1.5;
-    margin-top:6px;
-  }
-  .note-card b{color:var(--text);}
-  .progress-bar{
-    height:6px;
-    background:var(--bg-card);
-    border-radius:3px;
-    overflow:hidden;
-    margin-bottom:16px;
-  }
-  .progress-fill{
-    height:100%;
-    background:var(--accent);
-    transition:width .3s ease;
-  }
-  .cardio-badge{
-    display:inline-block;
-    background:var(--accent-soft);
-    color:#fff;
-    font-size:11px;
-    font-weight:700;
-    padding:4px 10px;
-    border-radius:20px;
-    margin-top:10px;
-  }
-  .reset-btn{
-    background:none;
-    border:1px solid var(--border);
-    color:var(--text-dim);
-    font-size:12px;
-    padding:8px 14px;
-    border-radius:8px;
-    margin-top:20px;
-    cursor:pointer;
-    width:100%;
-  }
+  .day-card h4{margin:0 0 4px;font-size:14.5px;font-weight:700;}
+  .day-card p{margin:0;font-size:12.5px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:14px;}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);}
+  th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.4px;}
+  .scroll{overflow-x:auto;}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Lean Bulk — 74 → 80kg</h1>
-  <p>Upper/Lower · 5 días · Mes 2</p>
+  <h1>Protocolo integral</h1>
+  <div class="sub" id="today"></div>
 </header>
 
-<div class="days-nav" id="daysNav"></div>
+<nav id="nav"></nav>
 
 <main>
-  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="day-title" id="dayTitle"></div>
-  <div class="day-subtitle" id="daySubtitle"></div>
-  <div id="exerciseList"></div>
-  <button class="reset-btn" id="resetBtn">Reiniciar checklist del día</button>
+  <section id="s-hoy"></section>
+  <section id="s-entreno"></section>
+  <section id="s-cuello"></section>
+  <section id="s-pelvico"></section>
+  <section id="s-mio"></section>
+  <section id="s-movilidad"></section>
+  <section id="s-guia"></section>
 </main>
 
 <script>
-const DATA = {
-  "Lunes": {
-    subtitle: "Upper A · Fuerza + Empuje",
-    exercises: [
-      {name:"Press banca plano", scheme:"4×6-8", ref:""},
-      {name:"Press militar barra", scheme:"4×6-8", ref:""},
-      {name:"Press inclinado mancuernas", scheme:"3×8-10", ref:""},
-      {name:"Elevaciones laterales mancuernas", scheme:"4×15-20", ref:""},
-      {name:"Elevaciones laterales polea baja", scheme:"3×15-20", ref:""},
-      {name:"Tríceps polea cuerda", scheme:"3×15-20", ref:""},
-      {name:"Tríceps sobre cabeza", scheme:"3×12-15", ref:""},
-      {name:"Face pulls", scheme:"3×15-20", ref:""}
+"use strict";
+
+/* ---------- utilidades ---------- */
+function dayKey(){
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function load(k){
+  try{
+    var raw = localStorage.getItem(k);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function save(k,v){
+  try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){}
+}
+function getState(){ return load("proto_" + dayKey()); }
+function setState(s){ save("proto_" + dayKey(), s); }
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ---------- datos: entrenamiento ---------- */
+var TRAIN = {
+  "upper1": {
+    title: "Upper 1",
+    lead: "Empuje + hombro · ~75 min",
+    ex: [
+      {n:"Press banca plano", d:"4×6-8", w:1},
+      {n:"Remo con barra", d:"4×6-8", w:1},
+      {n:"Press militar mancuernas", d:"4×8-10", w:1, r:"ref. 22,5 kg/mano"},
+      {n:"Dominadas o jalón al pecho", d:"3×8-10", w:1},
+      {n:"Elevaciones laterales mancuernas", d:"4×15-20", w:1},
+      {n:"Elevaciones laterales polea baja", d:"3×15-20", w:1},
+      {n:"Curl bíceps con barra", d:"3×12-15", w:1},
+      {n:"Curl martillo", d:"3×12-15", w:1},
+      {n:"Tríceps polea con cuerda", d:"3×12-15", w:1},
+      {n:"Tríceps sobre cabeza", d:"3×12-15", w:1},
+      {n:"Face pulls", d:"3×15-20", w:0}
     ]
   },
-  "Martes": {
-    subtitle: "Lower A · Cuádriceps",
-    exercises: [
-      {name:"Sentadilla con barra", scheme:"4×6-8", ref:"Sem.1: 60kg"},
-      {name:"Prensa", scheme:"3×12-15", ref:""},
-      {name:"Extensión cuádriceps", scheme:"3×15-20", ref:""},
-      {name:"Curl femoral tumbado", scheme:"4×15-20", ref:""},
-      {name:"Elevación talones de pie", scheme:"3×20", ref:""},
-      {name:"Core: crunch con peso", scheme:"3 series", ref:""},
-      {name:"Core: crunch lateral mancuerna", scheme:"3 series", ref:""},
-      {name:"Core: plancha", scheme:"3 series", ref:""},
-      {name:"Core: elevación piernas", scheme:"3 series", ref:""}
-    ],
-    cardio:"Bicicleta 20 min"
-  },
-  "Miércoles": {
-    subtitle: "Upper B · Tirón + Hombro + Brazos",
-    exercises: [
-      {name:"Dominadas / jalón", scheme:"4×6-8", ref:""},
-      {name:"Remo barra", scheme:"4×6-8", ref:""},
-      {name:"Remo polea baja", scheme:"3×15-20", ref:""},
-      {name:"Elevaciones laterales mancuernas", scheme:"4×15-20", ref:""},
-      {name:"Pájaro mancuernas", scheme:"3×15-20", ref:""},
-      {name:"Curl bíceps barra", scheme:"4×15-20", ref:""},
-      {name:"Curl predicador / polea", scheme:"3×12-15", ref:""},
-      {name:"Curl martillo", scheme:"3×12-15", ref:""},
-      {name:"Face pulls", scheme:"4×15-20", ref:""}
+  "upper2": {
+    title: "Upper 2",
+    lead: "Tirón + brazos · ~75 min",
+    ex: [
+      {n:"Press inclinado mancuernas", d:"4×8-10", w:1},
+      {n:"Remo en polea baja", d:"4×8-10", w:1},
+      {n:"Press militar con barra", d:"3×8-10", w:1},
+      {n:"Pájaro con mancuernas", d:"3×15-20", w:1},
+      {n:"Elevación lateral en polea, inclinado", d:"3×15-20", w:1, h:"Inclina el tronco alejándote de la polea: más rango y más tensión en el punto difícil."},
+      {n:"Curl predicador o en polea", d:"3×12-15", w:1},
+      {n:"Curl bíceps barra (agarre distinto al día 1)", d:"3×12-15", w:1},
+      {n:"Fondos en paralelas", d:"3×8-10", w:1},
+      {n:"Press banca agarre cerrado", d:"3×12-15", w:1},
+      {n:"Face pulls", d:"4×15-20", w:0}
     ]
   },
-  "Jueves": {
-    subtitle: "Lower B · Isquiotibial",
-    exercises: [
-      {name:"Peso muerto convencional", scheme:"4×5-6", ref:"Sem.1: 110kg"},
-      {name:"Peso muerto rumano", scheme:"3×8-10", ref:"Sem.1: 70kg, exc. lenta"},
-      {name:"Curl femoral sentado", scheme:"4×15-20", ref:""},
-      {name:"Hip thrust con carga", scheme:"3×12-15", ref:""},
-      {name:"Elevación talones sentado", scheme:"4×20", ref:""},
-      {name:"Core: elevación piernas", scheme:"3 series", ref:""},
-      {name:"Core: ab rueda", scheme:"3 series", ref:""},
-      {name:"Core: dead bug", scheme:"3 series", ref:""}
-    ],
-    cardio:"Bicicleta 20 min"
-  },
-  "Viernes": {
-    subtitle: "Upper C · Hombro + Brazos + Complemento",
-    exercises: [
-      {name:"Press militar mancuernas", scheme:"4×8-10", ref:"Sem.1: 22.5kg/mano"},
-      {name:"Elevaciones laterales mancuernas", scheme:"5×15-20", ref:""},
-      {name:"Elevaciones laterales polea baja", scheme:"3×15-20", ref:""},
-      {name:"Pájaro mancuernas", scheme:"3×15-20", ref:""},
-      {name:"Fondos paralelas", scheme:"3×8-10", ref:""},
-      {name:"Press banca agarre cerrado", scheme:"3×8-10", ref:""},
-      {name:"Curl bíceps barra", scheme:"3×15-20", ref:""},
-      {name:"Curl martillo", scheme:"3×12-15", ref:""},
-      {name:"Face pulls", scheme:"4×15-20", ref:""}
+  "piernas": {
+    title: "Piernas",
+    lead: "Empuje + tirón completo · ~70 min",
+    ex: [
+      {n:"Sentadilla con barra", d:"4×6-8", w:1, r:"ref. 100 kg", h:"Rodilla izquierda: si aparece molestia rotuliana, baja carga. Si sigue a 90 kg, suspende el ejercicio ese día."},
+      {n:"Peso muerto rumano", d:"4×8-10", w:1, r:"ref. 70 kg, excéntrica lenta"},
+      {n:"Prensa", d:"3×12-15", w:1},
+      {n:"Curl femoral (tumbado o sentado)", d:"4×15-20", w:1},
+      {n:"Hip thrust con carga", d:"3×12-15", w:1},
+      {n:"Extensión de cuádriceps", d:"3×15-20", w:1},
+      {n:"Elevación de talones", d:"3×20", w:1},
+      {n:"Core: crunch con peso", d:"3 series", w:0},
+      {n:"Core: rueda abdominal", d:"3×15, 3-5 s", w:0},
+      {n:"Core: elevación de piernas", d:"3 series", w:0},
+      {n:"Bicicleta", d:"20 min", w:0}
+    ]
+  }
+};
+var TRAIN_ORDER = ["upper1","upper2","piernas"];
+
+/* ---------- datos: cuello ---------- */
+var CUELLO_PRE = [
+  {n:"Chin tuck tumbado", d:"3×10, mantener 10 s",
+   h:"Boca arriba, rodillas flexionadas. Asentimiento suave como diciendo sí, sin levantar la cabeza. No debe activarse el esternocleidomastoideo. Es el ejercicio con mejor evidencia de todos."},
+  {n:"Chin tuck de pie contra pared", d:"3×10, mantener 3 s",
+   h:"Versión funcional. Lleva la barbilla atrás sin inclinar la cabeza, occipucio buscando la pared."},
+  {n:"Retracción escapular", d:"2×12",
+   h:"Junta los omóplatos sin encoger los hombros. Activación antes de press y remo."}
+];
+var CUELLO_POST = [
+  {n:"Isométricos en 4 direcciones", d:"3 rondas, 5-8 s cada una",
+   h:"Mano contra frente, cada lateral y nuca. La cabeza no se mueve."},
+  {n:"Estiramiento suboccipital", d:"2-3×30 s",
+   h:"Barbilla al pecho, manos guiando suavemente la coronilla hacia abajo."},
+  {n:"Estiramiento trapecio superior", d:"30 s por lado",
+   h:"Inclina la cabeza a un lado, mano del mismo lado tirando suavemente."},
+  {n:"Estiramiento elevador de la escápula", d:"30 s por lado",
+   h:"Gira la cabeza hacia la axila del mismo lado, mira hacia abajo, y con esa misma mano presiona muy suave la parte de atrás de la cabeza."},
+  {n:"Movilidad torácica en foam roller", d:"2 min",
+   h:"Extensión sobre el rodillo en la dorsal alta. Una dorsal rígida obliga al cuello a compensar."}
+];
+
+/* ---------- datos: suelo pélvico ---------- */
+var PELVICO = {
+  1: {
+    label:"Fase 1 · semanas 1-2",
+    pos:"Tumbado boca arriba, rodillas flexionadas",
+    ex:[
+      {n:"Contracciones sostenidas", d:"3×10, mantener 3 s, descanso 5 s"}
     ]
   },
-  "Cuello": {
-    subtitle: "Cervical · Postura · Diario",
-    exercises: [
-      {name:"Chin tucks (retracción cervical)", scheme:"3×10-12, 3seg", ref:""},
-      {name:"Isométricos de cuello (4 direcciones)", scheme:"3×5-8seg c/u", ref:""},
-      {name:"Estiramiento suboccipital", scheme:"2-3×30seg", ref:""},
-      {name:"Estiramiento trapecio superior", scheme:"30seg/lado", ref:""},
-      {name:"Estiramiento elevador escápula", scheme:"30seg/lado", ref:""},
-      {name:"Movilidad torácica (foam roller)", scheme:"2 min", ref:""}
+  2: {
+    label:"Fase 2 · semanas 3-6",
+    pos:"Sentado",
+    ex:[
+      {n:"Contracciones sostenidas", d:"3×10, mantener 5-8 s"},
+      {n:"Contracciones rápidas", d:"1×20, 1 s cada una"}
+    ]
+  },
+  3: {
+    label:"Fase 3 · semanas 7-12",
+    pos:"De pie, la posición más exigente",
+    ex:[
+      {n:"Contracciones sostenidas", d:"3×10, mantener 10 s"},
+      {n:"Contracciones rápidas", d:"2×20, 1 s cada una"},
+      {n:"Contracción en movimiento", d:"10 repeticiones",
+       h:"Al levantarte de la silla, al iniciar una repetición. Es la transferencia funcional."}
     ]
   }
 };
 
-const DAYS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Cuello"];
-let currentDay = DAYS[0];
+/* ---------- datos: miofuncional ---------- */
+var MIO = {
+  1: {
+    label:"Fase 1 · mes 1",
+    groups:[
+      {t:"Labios", ex:[
+        {n:"Abrir y cerrar la boca al máximo", d:"×10", h:"Los labios deben juntarse al cerrar."},
+        {n:"Fruncir los labios como para besar", d:"×10, mantener 10 s"},
+        {n:"Sonrisa exagerada y mantener", d:"×10"}
+      ]},
+      {t:"Lengua", ex:[
+        {n:"Cepillar la superficie superior y lateral de la lengua", d:"×10", h:"Con el cepillo de dientes, lengua apoyada en el suelo de la boca."},
+        {n:"Punta de la lengua al paladar anterior, deslizar hacia atrás", d:"×10"},
+        {n:"Sacar la lengua recta al frente y mantener", d:"×10", h:"Recta, sin desviarse a un lado. Cada día un poco más lejos."},
+        {n:"Sacar y meter la lengua lo más rápido posible", d:"×10"},
+        {n:"Lengua de comisura a comisura y círculo por los labios", d:"×10", h:"Rápido y sin perder contacto con los labios."}
+      ]},
+      {t:"Mandíbula", ex:[
+        {n:"Abrir y cerrar la boca rápido", d:"×10", h:"Los labios se juntan cada vez."},
+        {n:"Decir ma-ma-ma-ma y luego la-la-la-la", d:"×10", h:"Rápido, marcando la eme y la a cada vez."},
+        {n:"Masticar alternando lados y tragar", d:"×10", h:"Lengua en el paladar, dientes cerrados, sin contraer alrededor de la boca."}
+      ]}
+    ]
+  },
+  2: {
+    label:"Fase 2 · mes 2",
+    groups:[
+      {t:"Labios", ex:[
+        {n:"Fruncir, mantener, sonreír, mantener", d:"×10"},
+        {n:"Apretar los labios fuertemente cerrados", d:"×10"}
+      ]},
+      {t:"Lengua", ex:[
+        {n:"Sacar la lengua buscando la barbilla", d:"×10, mantener en extensión máxima"}
+      ]},
+      {t:"Mandíbula", ex:[
+        {n:"Decir ka-ka-ka-ka", d:"×10", h:"Rápido y con articulación clara."},
+        {n:"Decir kala-kala-kala-kala", d:"×10"}
+      ]},
+      {t:"Paladar blando — lo más importante de esta fase", ex:[
+        {n:"Elevación palatina con y sin bostezo", d:"×10", h:"Para notar conscientemente el ascenso del velo."},
+        {n:"Vocal abierta intermitente (isotónico)", d:"×10"},
+        {n:"Vocal abierta sostenida (isométrico)", d:"×10"}
+      ]},
+      {t:"Buccinador y pterigoideos", ex:[
+        {n:"Succión contrayendo solo el buccinador", d:"×10"},
+        {n:"Empujar la mejilla hacia fuera contra el dedo", d:"×10", h:"Dedo limpio dentro de la boca, el músculo empuja hacia fuera."},
+        {n:"Movimientos laterales de mandíbula", d:"×10"},
+        {n:"Inspiración nasal forzada y espiración oral con vocal", d:"×10", h:"Sentado."}
+      ]}
+    ]
+  },
+  3: {
+    label:"Fase 3 · mes 3 — la que más rinde",
+    groups:[
+      {t:"Buccinador", ex:[
+        {n:"Inflar un globo", d:"5 veces seguidas", h:"Inspiración nasal prolongada y soplido forzado, sin sacarte el globo de la boca entre repeticiones."}
+      ]},
+      {t:"Pterigoideos", ex:[
+        {n:"Elevación alternada de mandíbula adelante y lados", d:"×10"},
+        {n:"Cantar las vocales A-E-I-O-U", d:"×10", h:"Lo más fuerte que te atrevas."}
+      ]},
+      {t:"Lengua", ex:[
+        {n:"Empujar una cuchara con la punta de la lengua", d:"×10", h:"Cuchara de canto contra la punta, la mano resiste."},
+        {n:"Succión forzada de toda la lengua contra el paladar", d:"×10"}
+      ]},
+      {t:"Labios", ex:[
+        {n:"Fruncir con la boca abierta sin juntar mandíbulas", d:"×10, mantener"},
+        {n:"Cerrar los labios y hacer ruido de sorber", d:"×10"}
+      ]}
+    ]
+  }
+};
 
-// Detectar día actual real si coincide con lunes-viernes
-const today = new Date().getDay(); // 0=domingo,1=lunes...
-const map = {1:"Lunes",2:"Martes",3:"Miércoles",4:"Jueves",5:"Viernes"};
-if(map[today]) currentDay = map[today];
+/* ---------- datos: movilidad ---------- */
+var MOV = {
+  cadera:[
+    {n:"Psoas en zancada", d:"2×60 s por lado",
+     h:"Rodilla en el suelo. Mete el coxis hacia abajo (retroversión pélvica) antes de empujar la cadera adelante. Sin ese detalle no estiras el psoas, arqueas la lumbar."},
+    {n:"90/90", d:"2×60 s por lado + 10 rotaciones",
+     h:"Sentado, una pierna delante a 90 grados, la otra al lado a 90. Inclínate sobre la delantera. Alterna lados rotando sin usar las manos."},
+    {n:"Rana", d:"2×90 s",
+     h:"A cuatro patas, rodillas abiertas al máximo, tibias paralelas. Desplaza la cadera hacia atrás. Es el ejercicio clave para el spagat lateral."},
+    {n:"Mariposa con presión", d:"2×60 s",
+     h:"Plantas juntas, codos empujando las rodillas hacia el suelo."}
+  ],
+  isquios:[
+    {n:"Estiramiento con banda, técnica PNF contraer-relajar", d:"2 rondas × 4 ciclos por pierna",
+     h:"Tumbado, banda en el pie, pierna recta. Llevas al punto de tensión, empujas contra la banda al 20-30% de fuerza durante 6 s, sueltas y ganas rango. Repite 4 veces."},
+    {n:"Good morning con barra ligera", d:"3×10",
+     h:"Rango completo, poco peso. El entrenamiento de fuerza en rango completo mejora la flexibilidad de forma comparable al estiramiento."}
+  ],
+  espalda:[
+    {n:"Cat-cow", d:"10 repeticiones lentas"},
+    {n:"Rotación torácica 90/90 tumbado de lado", d:"10 por lado",
+     h:"También cuenta para el bloque de cuello: la rigidez dorsal obliga al cuello a compensar."},
+    {n:"Extensión torácica en foam roller", d:"2 min"},
+    {n:"Child's pose con alcance lateral", d:"60 s por lado"}
+  ],
+  spagat:[
+    {n:"Spagat frontal sobre bloques", d:"90 s por lado",
+     h:"Una vez por semana, al final de la sesión. Manos apoyadas en bloques o libros. Anota la altura cada mes: ese es tu marcador."},
+    {n:"Spagat lateral sobre bloques", d:"90 s",
+     h:"Si notas un tope duro en la ingle en vez de estiramiento muscular, es hueso. Ahí se para."}
+  ]
+};
 
-function loadChecklist(day){
-  const raw = localStorage.getItem('checklist_'+day+'_'+todayKey());
-  return raw ? JSON.parse(raw) : {};
+/* ---------- render de items ---------- */
+var uid = 0;
+function itemHTML(ex, key, withWeight){
+  var st = getState();
+  var done = !!st[key];
+  var val = st["w_"+key] || "";
+  var h = '<div class="item">';
+  h += '<div class="txt">';
+  h += '<div class="nm">' + esc(ex.n) + '</div>';
+  if(ex.d) h += '<div class="dt">' + esc(ex.d) + '</div>';
+  if(ex.h) h += '<div class="hint">' + esc(ex.h) + '</div>';
+  if(withWeight){
+    h += '<div class="wr"><label>Peso</label>';
+    h += '<input type="text" inputmode="decimal" placeholder="kg" value="' + esc(val) + '" data-w="' + key + '">';
+    if(ex.r) h += '<span class="ref">' + esc(ex.r) + '</span>';
+    h += '</div>';
+  }
+  h += '</div>';
+  h += '<button class="chk' + (done ? ' done' : '') + '" data-c="' + key + '" aria-label="Marcar"></button>';
+  h += '</div>';
+  return h;
 }
-function saveChecklist(day, data){
-  localStorage.setItem('checklist_'+day+'_'+todayKey(), JSON.stringify(data));
+function listHTML(arr, prefix, withWeight){
+  var h = "";
+  for(var i=0;i<arr.length;i++){
+    h += itemHTML(arr[i], prefix + "_" + i, withWeight && arr[i].w === 1);
+  }
+  return h;
 }
-function todayKey(){
-  const d = new Date();
-  return d.toISOString().slice(0,10);
+function progressHTML(prefix, count){
+  var st = getState(), n = 0;
+  for(var i=0;i<count;i++){ if(st[prefix+"_"+i]) n++; }
+  var pct = count ? (n/count*100) : 0;
+  return '<div class="bar"><div style="width:' + pct + '%"></div></div>';
 }
+
+/* ---------- secciones ---------- */
+var trainSel = "upper1";
+var mioSel = 1;
+var pelvSel = 1;
+
+function renderHoy(){
+  var h = '<h2>Hoy</h2><div class="lead">Cómo encaja todo en el día</div>';
+
+  h += '<div class="note"><b>No arranques todo a la vez.</b> Orden recomendado: primero cuello (ya rodado), luego suelo pélvico, luego miofuncional al terminar el antibiótico, y movilidad al volver al gimnasio con normalidad. Cinco protocolos el mismo día se abandonan en dos semanas.</div>';
+
+  h += '<h3>Día de Upper</h3>';
+  h += '<div class="day-card"><h4>Antes de entrenar · 4 min</h4><p>Cuello, bloque de activación: chin tucks y retracción escapular. Mejora la posición escapular en press y remo.</p></div>';
+  h += '<div class="day-card"><h4>Después · 15 min</h4><p>Cuello, bloque de estiramiento. Movilidad torácica y de cadera.</p></div>';
+  h += '<div class="day-card"><h4>Noche</h4><p>Suelo pélvico, tanda 2.</p></div>';
+
+  h += '<h3>Día de piernas</h3>';
+  h += '<div class="day-card"><h4>Antes</h4><p>Nada de estiramiento estático. Calentamiento dinámico normal. Tampoco suelo pélvico intenso: llegarías al peso muerto con el suelo pélvico prefatigado.</p></div>';
+  h += '<div class="day-card"><h4>Después · 20 min</h4><p>Movilidad de isquios con PNF y cadera. Músculo caliente: el mejor momento de la semana para ganar rango.</p></div>';
+  h += '<div class="day-card"><h4>Noche</h4><p>Suelo pélvico, las dos tandas si no las hiciste por la mañana.</p></div>';
+
+  h += '<h3>Días sin gimnasio</h3>';
+  h += '<div class="day-card"><h4>Cuando quieras · 25 min</h4><p>Sesión completa de cuello y el grueso de movilidad. Sin fatiga previa la calidad es mejor.</p></div>';
+
+  h += '<h3>Todos los días</h3>';
+  h += '<div class="day-card"><h4>Miofuncional</h4><p>3-4 tandas de 10 min en huecos: coche, ducha, cocinando, entre tareas. Cero interferencia con nada.</p></div>';
+  h += '<div class="day-card"><h4>Suelo pélvico</h4><p>Mañana y noche. Es invisible, nadie lo nota.</p></div>';
+
+  h += '<h3>Checklist de hoy</h3>';
+  var daily = [
+    {n:"Cuello — bloque completo", d:"8-10 min"},
+    {n:"Suelo pélvico — tanda mañana", d:""},
+    {n:"Suelo pélvico — tanda noche", d:""},
+    {n:"Miofuncional — tanda 1", d:""},
+    {n:"Miofuncional — tanda 2", d:""},
+    {n:"Miofuncional — tanda 3", d:""},
+    {n:"Movilidad", d:"15-20 min"},
+    {n:"Dormir de lado, no boca arriba", d:"", h:"Con colapso faríngeo, la postura supina empeora el cierre por gravedad. Puede tener más impacto inmediato que todos los ejercicios juntos."}
+  ];
+  h += progressHTML("hoy", daily.length);
+  h += listHTML(daily, "hoy", false);
+  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
+  return h;
+}
+
+function renderEntreno(){
+  var d = TRAIN[trainSel];
+  var h = '<h2>Entrenamiento</h2><div class="lead">3 días · 2 Upper + 1 Piernas</div>';
+  h += '<div class="phase-sel">';
+  for(var i=0;i<TRAIN_ORDER.length;i++){
+    var k = TRAIN_ORDER[i];
+    h += '<button data-train="' + k + '" class="' + (k===trainSel?'on':'') + '">' + esc(TRAIN[k].title) + '</button>';
+  }
+  h += '</div>';
+  h += '<h2>' + esc(d.title) + '</h2><div class="lead">' + esc(d.lead) + '</div>';
+  h += progressHTML("tr_"+trainSel, d.ex.length);
+  h += listHTML(d.ex, "tr_"+trainSel, true);
+  h += '<div class="note"><b>Descansos.</b> Compuestos pesados 90-120 s. Aislamiento con series de 15-20 repeticiones, 45-60 s: quieres mantener fatiga acumulada para maximizar la congestión.</div>';
+  h += '<div class="note warn"><b>Separación entre sesiones.</b> Los dos días de Upper necesitan 48 h entre ellos. Si solo tienes martes, miércoles y jueves: Upper 1 el martes, Piernas el miércoles, Upper 2 el jueves. Nunca los dos Upper seguidos.</div>';
+  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
+  return h;
+}
+
+function renderCuello(){
+  var h = '<h2>Cuello y postura</h2><div class="lead">Rectificación cervical · cefalea tensional · diario</div>';
+  h += '<div class="note bad"><b>Protrusiones C5-C7.</b> Nada de flexión cervical forzada bajo carga, ni rotaciones bruscas, ni círculos completos de cuello. Si algo genera hormigueo o dolor que baja al brazo, paras y lo comentas en consulta.</div>';
+
+  h += '<h3><span class="tag pre">Antes de entrenar</span></h3>';
+  h += progressHTML("cu_pre", CUELLO_PRE.length);
+  h += listHTML(CUELLO_PRE, "cu_pre", false);
+
+  h += '<h3><span class="tag post">Después de entrenar</span></h3>';
+  h += progressHTML("cu_post", CUELLO_POST.length);
+  h += listHTML(CUELLO_POST, "cu_post", false);
+
+  h += '<div class="note"><b>Qué esperar.</b> La evidencia es sólida para dolor, resistencia muscular y ángulo craneovertebral con entrenamiento de flexores profundos. Para revertir la rectificación en radiografía es mucho más débil. Objetivo realista: menos dolor de cabeza y mejor postura funcional.</div>';
+  h += '<div class="note"><b>Hábito diario.</b> Pantalla y móvil a la altura de los ojos. Es lo que más contribuye día a día a la pérdida de curvatura.</div>';
+  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
+  return h;
+}
+
+function renderPelvico(){
+  var f = PELVICO[pelvSel];
+  var h = '<h2>Suelo pélvico</h2><div class="lead">12 semanas · dos veces al día</div>';
+
+  h += '<div class="note"><b>Identificación correcta.</b> Contrae como si aguantaras un gas y a la vez cortaras el pis. Debes notar la base del pene y el perineo elevarse. Sin apretar glúteos, sin apretar abdomen, sin contener la respiración. Delante del espejo, la base del pene se mueve ligeramente hacia arriba.</div>';
+  h += '<div class="note bad"><b>Nunca durante la micción.</b> Cortar el chorro sirve para identificar el músculo la primera vez, no como entrenamiento. Repetirlo habitualmente puede dejar vaciado incompleto de vejiga y alterar la coordinación vejiga-esfínter.</div>';
+
+  h += '<div class="phase-sel">';
+  for(var k=1;k<=3;k++){
+    h += '<button data-pelv="' + k + '" class="' + (k===pelvSel?'on':'') + '">Fase ' + k + '</button>';
+  }
+  h += '</div>';
+
+  h += '<h2>' + esc(f.label) + '</h2><div class="lead">' + esc(f.pos) + '</div>';
+  h += progressHTML("pv_"+pelvSel, f.ex.length);
+  h += listHTML(f.ex, "pv_"+pelvSel, false);
+
+  h += '<div class="note warn"><b>La relajación importa tanto como la contracción.</b> Un suelo pélvico hipertónico da los mismos problemas que uno débil. Entre contracciones, suelta del todo. Si notas molestia perineal, dolor al sentarte o urgencia urinaria, estás sobreentrenando: para una semana.</div>';
+  h += '<div class="note"><b>Plazos.</b> 4-6 semanas: mejor control eyaculatorio. 8-12 semanas: erecciones más firmes y duraderas. 3-6 meses: beneficio máximo. En el ensayo de referencia, a seis meses el 40% recuperó función normal y el 35,5% mejoró.</div>';
+  h += '<div class="note"><b>Y sirve para lo otro.</b> Es el mismo músculo que se entrena para separar orgasmo de eyaculación. Un suelo pélvico fuerte y con buen control voluntario es el requisito previo.</div>';
+  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
+  return h;
+}
+
+function renderMio(){
+  var f = MIO[mioSel];
+  var h = '<h2>Terapia miofuncional</h2><div class="lead">Ronquido y colapso faríngeo · 3 meses</div>';
+
+  h += '<div class="note"><b>Dosis.</b> Cada ejercicio 10 repeticiones. El conjunto, 3-5 veces al día, unos 10 minutos por tanda. Aprovecha tiempos muertos. Cada fase dura un mes.</div>';
+
+  h += '<div class="phase-sel">';
+  for(var k=1;k<=3;k++){
+    h += '<button data-mio="' + k + '" class="' + (k===mioSel?'on':'') + '">Fase ' + k + '</button>';
+  }
+  h += '</div>';
+
+  h += '<h2>' + esc(f.label) + '</h2>';
+
+  var total = 0, idx = 0;
+  for(var g=0; g<f.groups.length; g++){ total += f.groups[g].ex.length; }
+  h += progressHTML("mio_"+mioSel, total);
+
+  for(var g2=0; g2<f.groups.length; g2++){
+    var grp = f.groups[g2];
+    h += '<h3>' + esc(grp.t) + '</h3>';
+    for(var e=0; e<grp.ex.length; e++){
+      h += itemHTML(grp.ex[e], "mio_"+mioSel+"_"+idx, false);
+      idx++;
+    }
+  }
+
+  h += '<div class="note"><b>Qué mejora de verdad.</b> En el estudio por fases, a los tres meses: intensidad del ronquido de 2,8 a 1,7, somnolencia diurna resuelta en 14 de 16 pacientes, índice de arousals de 15,6 a 12,8, más tiempo en sueño profundo N3 y circunferencia de cuello reducida. El índice de apnea-hipopnea apenas se movió. Mejora la calidad del sueño y el ronquido más que el número de apneas — que es justo lo que necesitas.</div>';
+  h += '<div class="note"><b>Percepción de mejoría por fase.</b> Fase 1: 10-15%. Fase 2: 15-20%. Fase 3: 40-45%. La fase 3 es donde está casi todo el beneficio. Llegar hasta ahí es lo que decide el resultado.</div>';
+  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
+  return h;
+}
+
+function renderMovilidad(){
+  var h = '<h2>Movilidad</h2><div class="lead">Cadera · isquios · espalda · 5-6 días/semana</div>';
+
+  h += '<div class="note bad"><b>Nunca antes de entrenar fuerza.</b> El estiramiento estático reduce la producción de fuerza de forma aguda. Va después de la sesión o en otro momento del día.</div>';
+  h += '<div class="note"><b>La dosis que manda.</b> Un metaanálisis de 2024 con 189 estudios y 6.654 adultos estableció que la dosis óptima para ganancias de rango a largo plazo es de unos 10 minutos por grupo muscular y semana. Es menos de lo que la gente cree: necesitas acumular volumen semanal, no sesiones épicas.</div>';
+
+  h += '<h3><span class="tag post">Cadera</span></h3>';
+  h += progressHTML("mv_cadera", MOV.cadera.length);
+  h += listHTML(MOV.cadera, "mv_cadera", false);
+
+  h += '<h3><span class="tag post">Isquiotibiales</span></h3>';
+  h += progressHTML("mv_isquios", MOV.isquios.length);
+  h += listHTML(MOV.isquios, "mv_isquios", false);
+
+  h += '<h3><span class="tag any">Espalda</span></h3>';
+  h += progressHTML("mv_espalda", MOV.espalda.length);
+  h += listHTML(MOV.espalda, "mv_espalda", false);
+
+  h += '<h3><span class="tag any">Spagat · una vez por semana</span></h3>';
+  h += progressHTML("mv_spagat", MOV.spagat.length);
+  h += listHTML(MOV.spagat, "mv_spagat", false);
+
+  h += '<div class="note warn"><b>Rodilla izquierda.</b> Nada de esto debería tocarla, pero si la rana o el 90/90 generan molestia rotuliana, reduce el rango. La sentadilla profunda cargada queda en pausa hasta que se aclare.</div>';
+  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
+  return h;
+}
+
+function renderGuia(){
+  var h = '<h2>Guía</h2><div class="lead">Reglas, medición y contexto clínico</div>';
+
+  h += '<h3>Las tres reglas de encaje</h3>';
+  h += '<ul>';
+  h += '<li><b>Estiramiento estático antes de fuerza: no.</b> Reduce la producción de fuerza. Movilidad siempre después.</li>';
+  h += '<li><b>Suelo pélvico y días de pierna: separados.</b> Sentadilla y peso muerto ya cargan el suelo pélvico. La tanda fuerte va por la noche esos días.</li>';
+  h += '<li><b>Cuello antes de Upper: sí.</b> Chin tucks y retracción escapular son activación, no estiramiento. Los estiramientos, después.</li>';
+  h += '</ul>';
+
+  h += '<h3>Medidas de entorno — las que más rinden</h3>';
+  h += '<ul>';
+  h += '<li><b>Dormir de lado, nunca boca arriba.</b> Truco de la pelota de tenis cosida en la espalda del pijama si te giras dormido.</li>';
+  h += '<li><b>Cabecera elevada</b> 10-15 cm.</li>';
+  h += '<li><b>Fundas antiácaros</b> en colchón y almohada, sábanas a 60 grados. Tienes IgE específica positiva a ambos dermatofagoides y es tu dormitorio.</li>';
+  h += '<li><b>Alcohol cero</b> las noches importantes: relaja la musculatura faríngea directamente.</li>';
+  h += '<li><b>Respiración nasal consciente de día.</b> Boca cerrada, lengua en el paladar. Reeduca el patrón que luego se mantiene de noche.</li>';
+  h += '</ul>';
+
+  h += '<h3>Cómo medir si funciona</h3>';
+  h += '<div class="scroll"><table>';
+  h += '<tr><th>Marcador</th><th>Cadencia</th><th>Referencia</th></tr>';
+  h += '<tr><td>Grabación de ronquidos</td><td>1 noche al mes</td><td>App gratuita. El dato más contundente para consulta.</td></tr>';
+  h += '<tr><td>Energía matutina 1-10</td><td>Diario al despertar</td><td>Tu síntoma principal. Es lo que más debería moverse.</td></tr>';
+  h += '<tr><td>Circunferencia de cuello</td><td>Mensual</td><td>En el estudio bajó de 38,4 a 37,8 cm en 3 meses.</td></tr>';
+  h += '<tr><td>Altura de bloques en spagat</td><td>Mensual</td><td>Marcador objetivo de progreso de movilidad.</td></tr>';
+  h += '<tr><td>Peso en ayunas</td><td>Diario</td><td>Objetivo lean bulk hacia 80 kg.</td></tr>';
+  h += '</table></div>';
+
+  h += '<h3>Calendario de arranque</h3>';
+  h += '<ul>';
+  h += '<li><b>Ahora, hasta terminar el antibiótico del H. pylori:</b> solo medidas de entorno y cuello. Cero esfuerzo añadido.</li>';
+  h += '<li><b>Consulta de neumología:</b> pedir derivación a logopeda para terapia miofuncional y valorar polisomnografía completa en laboratorio.</li>';
+  h += '<li><b>Semana siguiente al antibiótico:</b> arranca miofuncional fase 1 y suelo pélvico fase 1. Empieza el reloj de los 3 meses.</li>';
+  h += '<li><b>Cuatro semanas tras la última dosis:</b> test de aliento de control del H. pylori.</li>';
+  h += '<li><b>Al volver al gimnasio con normalidad:</b> entra el bloque de movilidad.</li>';
+  h += '</ul>';
+
+  h += '<h3>Expectativa honesta sobre el spagat</h3>';
+  h += '<p>El spagat lateral completo depende mucho de la arquitectura de la cadera: ángulo y profundidad del acetábulo, orientación del cuello femoral. Eso no se entrena. A los 39, lo realista en 12 meses de trabajo constante es spagat frontal cercano o completo, abducción muy por encima de la media y movilidad funcional excelente. El lateral a 180 grados puede llegar o puede que haya tope óseo. Lo sabrás cuando notes un bloqueo duro en la ingle en vez de estiramiento muscular. El 90% del camino es alcanzable y es donde está todo el beneficio real.</p>';
+
+  h += '<h3>Suplementación durante la erradicación</h3>';
+  h += '<ul>';
+  h += '<li><b>Yovis IBS</b> en ayunas, separado 2-3 h de cada toma de antibiótico.</li>';
+  h += '<li><b>Gelsectan</b> con desayuno y cena.</li>';
+  h += '<li><b>Vitamina D</b> con el desayuno, una sola fuente: o el Hidroferol mensual o el bote diario, no ambos.</li>';
+  h += '<li><b>Magnesio</b> una hora antes de dormir.</li>';
+  h += '<li><b>Fuera por ahora:</b> Rhodiola y Mariendistel. El cardo mariano enmascararía la analítica de control de transaminasas.</li>';
+  h += '<li><b>Después del tratamiento:</b> entran los Flora Essentials Plus en la fase de recolonización, despacio por los prebióticos fermentables.</li>';
+  h += '</ul>';
+
+  h += '<h3>Seguimientos abiertos</h3>';
+  h += '<ul>';
+  h += '<li>Test de aliento de control del H. pylori, 4 semanas tras el antibiótico.</li>';
+  h += '<li>Polisomnografía completa en laboratorio.</li>';
+  h += '<li>Control evolutivo de la parotiditis izquierda (ecografía de junio de 2026).</li>';
+  h += '<li>Repetir transaminasas sin entrenar los 2-3 días previos a la extracción.</li>';
+  h += '<li>Rodilla izquierda: molestia rotuliana a 120 kg que persistía a 90 kg, sin revisar.</li>';
+  h += '</ul>';
+
+  return h;
+}
+
+/* ---------- navegación ---------- */
+var TABS = [
+  {id:"hoy", label:"Hoy", fn:renderHoy},
+  {id:"entreno", label:"Entreno", fn:renderEntreno},
+  {id:"cuello", label:"Cuello", fn:renderCuello},
+  {id:"pelvico", label:"Suelo pélvico", fn:renderPelvico},
+  {id:"mio", label:"Miofuncional", fn:renderMio},
+  {id:"movilidad", label:"Movilidad", fn:renderMovilidad},
+  {id:"guia", label:"Guía", fn:renderGuia}
+];
+var current = "hoy";
 
 function renderNav(){
-  const nav = document.getElementById('daysNav');
-  nav.innerHTML = '';
-  DAYS.forEach(day=>{
-    const btn = document.createElement('button');
-    btn.className = 'day-btn' + (day===currentDay ? ' active' : '');
-    btn.textContent = day;
-    btn.onclick = ()=>{ currentDay = day; render(); };
-    nav.appendChild(btn);
-  });
+  var n = document.getElementById("nav");
+  var h = "";
+  for(var i=0;i<TABS.length;i++){
+    h += '<button data-tab="' + TABS[i].id + '" class="' + (TABS[i].id===current?'on':'') + '">' + esc(TABS[i].label) + '</button>';
+  }
+  n.innerHTML = h;
 }
 
 function render(){
   renderNav();
-  const dayData = DATA[currentDay];
-  document.getElementById('dayTitle').textContent = currentDay;
-  document.getElementById('daySubtitle').textContent = dayData.subtitle;
-
-  const checklist = loadChecklist(currentDay);
-  const list = document.getElementById('exerciseList');
-  list.innerHTML = '';
-
-  dayData.exercises.forEach((ex, i)=>{
-    const isDone = !!checklist[i];
-    const weightVal = checklist['w'+i] || '';
-
-    const card = document.createElement('div');
-    card.className = 'exercise';
-    card.innerHTML = `
-      <div class="exercise-head" data-idx="${i}">
-        <div>
-          <div class="exercise-name">${ex.name}</div>
-          <div class="exercise-scheme">${ex.scheme}</div>
-        </div>
-        <div class="check ${isDone?'done':''}" data-check="${i}"></div>
-      </div>
-      <div class="weight-row ${isDone?'open':''}" data-weightrow="${i}">
-        <label>Peso usado</label>
-        <input type="text" inputmode="decimal" placeholder="kg" value="${weightVal}" data-weightinput="${i}">
-        ${ex.ref ? `<span class="ref">${ex.ref}</span>` : ''}
-      </div>
-    `;
-    list.appendChild(card);
-  });
-
-  if(dayData.cardio){
-    const badge = document.createElement('div');
-    badge.className = 'cardio-badge';
-    badge.textContent = '🚴 ' + dayData.cardio;
-    list.appendChild(badge);
+  for(var i=0;i<TABS.length;i++){
+    var el = document.getElementById("s-" + TABS[i].id);
+    if(!el) continue;
+    if(TABS[i].id === current){
+      el.innerHTML = TABS[i].fn();
+      el.className = "on";
+    }else{
+      el.className = "";
+      el.innerHTML = "";
+    }
   }
-
-  // notas específicas
-  const noteDiv = document.createElement('div');
-  noteDiv.className = 'note-card';
-  if(currentDay==="Cuello"){
-    noteDiv.innerHTML = '<b>Rutina diaria</b> — chin tucks y estiramientos suboccipitales idealmente todos los días (5-10 min). El resto, 3-4 veces por semana. Objetivo: recuperar curvatura cervical y reducir dolor de cabeza tensional referido desde la nuca. Precaución: protrusiones C5-C7 — evitar flexión cervical forzada bajo carga.';
-  } else if(currentDay==="Lunes" || currentDay==="Miércoles" || currentDay==="Viernes"){
-    noteDiv.innerHTML = '<b>Postura:</b> face pulls obligatorios. Estiramientos pectorales y retracción escapular al terminar.';
-  } else {
-    noteDiv.innerHTML = '<b>Piernas:</b> objetivo definición sin volumen excesivo. Cardio 20 min obligatorio.';
-  }
-  list.appendChild(noteDiv);
-
-  updateProgress(dayData, checklist);
-  attachHandlers(dayData);
 }
 
-function updateProgress(dayData, checklist){
-  const total = dayData.exercises.length;
-  let done = 0;
-  for(let i=0;i<total;i++){ if(checklist[i]) done++; }
-  const pct = total ? (done/total*100) : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
+function renderHeader(){
+  var days = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  var months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var d = new Date();
+  document.getElementById("today").textContent =
+    days[d.getDay()] + ", " + d.getDate() + " de " + months[d.getMonth()];
 }
 
-function attachHandlers(dayData){
-  document.querySelectorAll('[data-check]').forEach(el=>{
-    el.onclick = (e)=>{
-      e.stopPropagation();
-      const idx = el.getAttribute('data-check');
-      const checklist = loadChecklist(currentDay);
-      checklist[idx] = !checklist[idx];
-      saveChecklist(currentDay, checklist);
-      render();
-    };
-  });
-  document.querySelectorAll('.exercise-head').forEach(el=>{
-    el.onclick = ()=>{
-      const idx = el.getAttribute('data-idx');
-      const row = document.querySelector(`[data-weightrow="${idx}"]`);
-      row.classList.toggle('open');
-    };
-  });
-  document.querySelectorAll('[data-weightinput]').forEach(el=>{
-    el.onchange = ()=>{
-      const idx = el.getAttribute('data-weightinput');
-      const checklist = loadChecklist(currentDay);
-      checklist['w'+idx] = el.value;
-      saveChecklist(currentDay, checklist);
-    };
-  });
-}
+/* ---------- eventos ---------- */
+document.addEventListener("click", function(ev){
+  var t = ev.target;
+  if(!t || !t.getAttribute) return;
 
-document.getElementById('resetBtn').onclick = ()=>{
-  if(confirm('¿Reiniciar el checklist de hoy para este día?')){
-    saveChecklist(currentDay, {});
+  var tab = t.getAttribute("data-tab");
+  if(tab){ current = tab; render(); window.scrollTo(0,0); return; }
+
+  var tr = t.getAttribute("data-train");
+  if(tr){ trainSel = tr; render(); return; }
+
+  var mi = t.getAttribute("data-mio");
+  if(mi){ mioSel = parseInt(mi,10); render(); return; }
+
+  var pv = t.getAttribute("data-pelv");
+  if(pv){ pelvSel = parseInt(pv,10); render(); return; }
+
+  var c = t.getAttribute("data-c");
+  if(c){
+    var st = getState();
+    st[c] = !st[c];
+    setState(st);
     render();
+    return;
   }
-};
 
+  if(t.getAttribute("data-reset")){
+    if(window.confirm("¿Reiniciar todas las marcas de hoy?")){
+      setState({});
+      render();
+    }
+    return;
+  }
+});
+
+document.addEventListener("change", function(ev){
+  var t = ev.target;
+  if(!t || !t.getAttribute) return;
+  var w = t.getAttribute("data-w");
+  if(w){
+    var st = getState();
+    st["w_"+w] = t.value;
+    setState(st);
+  }
+});
+
+renderHeader();
 render();
 </script>
 
