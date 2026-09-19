@@ -3,734 +3,1486 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Protocolo Dani</title>
+<title>Mi día</title>
 <style>
-  :root{
-    box-sizing:border-box;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    --bg:#0F1E30;
-    --card:#152840;
-    --card2:#1B3049;
-    --accent:#4FA8E8;
-    --accent2:#2E6FA8;
-    --text:#E8F0F8;
-    --dim:#8FA8C4;
-    --border:#233B58;
-    --ok:#5FC98D;
-    --warn:#E8B04F;
-    --bad:#E86B6B;
-  }
-  *,*::before,*::after{box-sizing:inherit;}
-  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
-  body{
-    margin:0;background:var(--bg);color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-    font-size:15px;line-height:1.5;padding-bottom:50px;
-  }
-  header{
-    padding:18px 16px 12px;border-bottom:1px solid var(--border);
-    position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:20;
-  }
-  h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-0.3px;}
-  .sub{color:var(--dim);font-size:12.5px;margin-top:3px;}
-  nav{
-    display:flex;gap:6px;padding:10px 16px 0;overflow-x:auto;
-    background:var(--bg);position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:19;
-    border-bottom:1px solid var(--border);padding-bottom:10px;
-    scrollbar-width:none;-ms-overflow-style:none;
-  }
-  nav::-webkit-scrollbar{display:none;}
-  nav button{
-    flex:0 0 auto;background:var(--card);border:1px solid var(--border);color:var(--dim);
-    padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:600;
-    white-space:nowrap;cursor:pointer;font-family:inherit;
-  }
-  nav button.on{background:var(--accent2);border-color:var(--accent);color:#fff;}
-  main{padding:16px;max-width:820px;margin:0 auto;}
-  section{display:none;}
-  section.on{display:block;}
-  h2{font-size:16px;margin:0 0 3px;font-weight:700;}
-  h3{font-size:13px;margin:22px 0 9px;font-weight:700;text-transform:uppercase;
-     letter-spacing:.6px;color:var(--dim);}
-  .lead{color:var(--accent);font-size:12.5px;font-weight:600;margin-bottom:14px;}
-  .bar{height:5px;background:var(--card);border-radius:3px;overflow:hidden;margin:0 0 14px;}
-  .bar div{height:100%;background:var(--accent);width:0;transition:width .3s;}
-  .item{
-    background:var(--card);border:1px solid var(--border);border-radius:11px;
-    padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;
-  }
-  .item .txt{flex:1;min-width:0;}
-  .item .nm{font-size:14.5px;font-weight:600;}
-  .item .dt{color:var(--dim);font-size:12.5px;margin-top:2px;}
-  .item .hint{color:var(--dim);font-size:11.5px;margin-top:5px;font-style:italic;line-height:1.45;}
-  .chk{
-    width:24px;height:24px;flex:0 0 24px;border-radius:7px;border:2px solid var(--border);
-    display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px;
-    background:transparent;padding:0;
-  }
-  .chk.done{background:var(--ok);border-color:var(--ok);}
-  .chk.done::after{content:"✓";color:#0F1E30;font-size:14px;font-weight:900;line-height:1;}
-  .wr{display:flex;align-items:center;gap:9px;margin-top:10px;padding-top:10px;
-      border-top:1px solid var(--border);flex-wrap:wrap;}
-  .wr label{font-size:11.5px;color:var(--dim);}
-  .wr input{
-    background:var(--card2);border:1px solid var(--border);color:var(--text);
-    border-radius:7px;padding:6px 9px;font-size:13.5px;width:84px;font-family:inherit;
-  }
-  .wr .ref{font-size:11px;color:var(--dim);font-style:italic;}
-  .note{
-    background:var(--card2);border:1px solid var(--accent2);border-radius:11px;
-    padding:13px 15px;font-size:13px;color:var(--dim);line-height:1.55;margin:14px 0;
-  }
-  .note b{color:var(--text);}
-  .note.warn{border-color:var(--warn);}
-  .note.bad{border-color:var(--bad);}
-  .tag{
-    display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;
-    border-radius:20px;margin-bottom:8px;letter-spacing:.3px;
-  }
-  .tag.pre{background:var(--accent2);color:#fff;}
-  .tag.post{background:#3A5470;color:#fff;}
-  .tag.any{background:#2C4159;color:var(--dim);}
-  p{margin:0 0 11px;font-size:13.5px;color:var(--dim);line-height:1.6;}
-  p b, li b{color:var(--text);}
-  ul{margin:0 0 13px;padding-left:19px;}
-  li{font-size:13.5px;color:var(--dim);margin-bottom:6px;line-height:1.55;}
-  .phase-sel{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
-  .phase-sel button{
-    background:var(--card);border:1px solid var(--border);color:var(--dim);
-    padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;
-    cursor:pointer;font-family:inherit;
-  }
-  .phase-sel button.on{background:var(--accent2);border-color:var(--accent);color:#fff;}
-  .btn{
-    width:100%;background:transparent;border:1px solid var(--border);color:var(--dim);
-    padding:11px;border-radius:9px;font-size:12.5px;margin-top:18px;cursor:pointer;
-    font-family:inherit;
-  }
-  .day-card{
-    background:var(--card);border:1px solid var(--border);border-radius:11px;
-    padding:14px;margin-bottom:10px;
-  }
-  .day-card h4{margin:0 0 4px;font-size:14.5px;font-weight:700;}
-  .day-card p{margin:0;font-size:12.5px;}
-  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:14px;}
-  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);}
-  th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.4px;}
-  .scroll{overflow-x:auto;}
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#0E1B2B; --bg2:#122336;
+  --card:#16283D; --card2:#1C3149; --line:#24405E;
+  --tx:#EAF2FA; --dim:#8FA8C4; --dim2:#6B839E;
+  --fuerza:#4FA8E8; --movil:#5FC98D; --aire:#A98FE8; --pelvi:#E8B04F; --reg:#57C4CE;
+  --bad:#E86B6B;
+  --r:14px;
+}
+*,*::before,*::after{box-sizing:inherit;-webkit-tap-highlight-color:transparent;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  margin:0;background:var(--bg);color:var(--tx);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  font-size:16px;line-height:1.5;padding-bottom:78px;overscroll-behavior-y:contain;
+}
+button{font-family:inherit;cursor:pointer;}
+input,select{font-family:inherit;}
+
+/* ---------- cabecera ---------- */
+header{padding:16px 18px 12px;background:var(--bg);position:sticky;
+  top:env(safe-area-inset-top,0px);z-index:30;border-bottom:1px solid var(--line);}
+.htop{display:flex;align-items:center;gap:14px;}
+.hinfo{flex:1;min-width:0;}
+.hday{font-size:23px;font-weight:800;letter-spacing:-.5px;line-height:1.15;}
+.hsub{font-size:13px;color:var(--dim);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ring{width:54px;height:54px;flex:0 0 54px;position:relative;}
+.ring svg{transform:rotate(-90deg);}
+.ring .n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;}
+.dsel{display:flex;gap:5px;margin-top:13px;}
+.dsel button{flex:1;background:var(--card);border:1px solid var(--line);color:var(--dim2);
+  padding:11px 0;border-radius:10px;font-size:13px;font-weight:800;min-height:44px;}
+.dsel button.on{background:var(--fuerza);border-color:var(--fuerza);color:#08131F;}
+.dsel button.hoy{border-color:var(--fuerza);color:var(--tx);}
+
+/* ---------- navegación inferior ---------- */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;
+  background:var(--bg2);border-top:1px solid var(--line);
+  padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));}
+.tabs button{flex:1;background:none;border:0;color:var(--dim2);font-size:10.5px;
+  font-weight:700;padding:6px 2px;min-height:48px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;border-radius:10px;}
+.tabs button.on{color:var(--fuerza);background:rgba(79,168,232,.10);}
+.tabs .ic{font-size:19px;line-height:1;}
+
+main{padding:16px 16px 10px;max-width:860px;margin:0 auto;}
+
+/* ---------- bloques ---------- */
+.blk{margin-bottom:10px;border-radius:var(--r);overflow:hidden;
+  background:var(--card);border:1px solid var(--line);}
+.blk.now{border-color:var(--fuerza);box-shadow:0 0 0 1px rgba(79,168,232,.25);}
+.bh{display:flex;align-items:center;gap:11px;padding:14px 15px;background:none;
+  border:0;width:100%;text-align:left;color:var(--tx);min-height:56px;}
+.bh .dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;}
+.bh .bt{flex:1;min-width:0;}
+.bh .bn{font-size:15.5px;font-weight:700;line-height:1.2;}
+.bh .bm{font-size:11.5px;color:var(--dim2);margin-top:2px;}
+.bh .bc{font-size:12px;font-weight:800;color:var(--dim);white-space:nowrap;}
+.bh .ar{font-size:12px;color:var(--dim2);transition:transform .2s;}
+.bh[aria-expanded="true"] .ar{transform:rotate(90deg);}
+.bb{padding:0 12px 12px;}
+.bnote{font-size:12.5px;color:var(--dim);line-height:1.5;padding:0 3px 11px;}
+
+/* ---------- ítems ---------- */
+.it{display:flex;gap:12px;align-items:flex-start;padding:11px 10px;border-radius:11px;
+  background:var(--bg2);margin-bottom:6px;border:1px solid transparent;}
+.it.ok{opacity:.42;}
+.it.ok .nm{text-decoration:line-through;}
+.it.ok .hint,.it.ok .meta{display:none;}
+.it .tx{flex:1;min-width:0;}
+.nm{font-size:16px;font-weight:600;line-height:1.3;}
+.sch{font-size:14px;font-weight:700;margin-top:3px;}
+.meta{font-size:12px;color:var(--dim);margin-top:4px;}
+.hint{font-size:12.5px;color:var(--dim2);margin-top:6px;line-height:1.5;}
+.chk{width:30px;height:30px;flex:0 0 30px;border-radius:9px;border:2px solid var(--line);
+  background:transparent;display:flex;align-items:center;justify-content:center;
+  margin:-3px -2px 0 0;padding:0;position:relative;}
+.chk::before{content:"";position:absolute;inset:-8px;}
+.chk[aria-pressed="true"]{background:var(--movil);border-color:var(--movil);}
+.chk[aria-pressed="true"]::after{content:"✓";color:#08131F;font-size:16px;font-weight:900;line-height:1;}
+
+/* ---------- botón primario ---------- */
+.cta{display:block;width:100%;border:0;border-radius:var(--r);padding:17px;
+  font-size:16px;font-weight:800;color:#08131F;margin-bottom:14px;min-height:56px;}
+.cta.f{background:var(--fuerza);}
+.cta.g{background:var(--movil);}
+.ghost{display:block;width:100%;background:transparent;border:1px solid var(--line);
+  color:var(--dim);border-radius:12px;padding:13px;font-size:13px;margin-top:10px;min-height:48px;}
+
+/* ---------- registro rápido ---------- */
+.quick{display:flex;gap:9px;margin-bottom:14px;}
+.qcard{flex:1;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px;text-align:center;min-height:82px;display:flex;flex-direction:column;
+  justify-content:center;color:var(--tx);}
+.qcard .ql{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim2);font-weight:700;}
+.qcard .qv{font-size:22px;font-weight:800;margin-top:3px;line-height:1.1;}
+.qcard .qv.empty{color:var(--dim2);font-size:15px;font-weight:600;}
+.qcard .qu{font-size:11px;color:var(--dim2);}
+
+/* ---------- modal ---------- */
+.ov{position:fixed;inset:0;background:rgba(6,12,20,.86);z-index:60;display:flex;
+  align-items:flex-end;justify-content:center;}
+.sheet{background:var(--bg2);border-top-left-radius:20px;border-top-right-radius:20px;
+  width:100%;max-width:520px;max-height:88vh;overflow-y:auto;
+  padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px));border:1px solid var(--line);}
+.sheet h3{margin:0 0 4px;font-size:19px;font-weight:800;}
+.sheet .sd{font-size:13px;color:var(--dim);margin-bottom:16px;}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.row button{flex:1 0 auto;min-width:46px;background:var(--card);border:1px solid var(--line);
+  color:var(--dim);border-radius:10px;padding:13px 8px;font-size:15px;font-weight:700;min-height:48px;}
+.row button.on{background:var(--fuerza);border-color:var(--fuerza);color:#08131F;}
+.fld{margin-bottom:14px;}
+.fld label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--dim2);font-weight:700;margin-bottom:7px;}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--bg);border:1px solid var(--line);
+  color:var(--tx);border-radius:11px;padding:14px;font-size:17px;min-height:50px;}
+.fld textarea{min-height:76px;font-size:15px;resize:vertical;}
+
+/* ---------- modo sesión ---------- */
+.sess{position:fixed;inset:0;background:var(--bg);z-index:70;display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+.sbar{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);}
+.sbar .x{background:none;border:0;color:var(--dim);font-size:24px;padding:4px 10px;min-height:44px;}
+.sprog{flex:1;height:5px;background:var(--card);border-radius:3px;overflow:hidden;}
+.sprog div{height:100%;background:var(--fuerza);transition:width .3s;}
+.sbar .sc{font-size:12.5px;color:var(--dim);font-weight:700;white-space:nowrap;}
+.sbody{flex:1;overflow-y:auto;padding:22px 18px;}
+.sex{font-size:28px;font-weight:800;line-height:1.15;letter-spacing:-.6px;}
+.ssch{font-size:17px;font-weight:700;margin-top:6px;}
+.slast{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:13px 15px;margin-top:18px;font-size:13.5px;color:var(--dim);}
+.slast b{color:var(--tx);}
+.slast .sug{color:var(--movil);font-weight:700;}
+.sets{display:flex;gap:8px;margin:20px 0 6px;flex-wrap:wrap;}
+.sets button{width:52px;height:52px;border-radius:13px;background:var(--card);
+  border:2px solid var(--line);color:var(--dim2);font-size:16px;font-weight:800;}
+.sets button.on{background:var(--fuerza);border-color:var(--fuerza);color:#08131F;}
+.sfoot{border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;background:var(--bg2);}
+.sfoot button{flex:1;border-radius:13px;padding:16px;font-size:15px;font-weight:800;min-height:56px;border:0;}
+.sfoot .prev{background:var(--card);color:var(--dim);flex:0 0 68px;}
+.sfoot .next{background:var(--fuerza);color:#08131F;}
+.timer{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));
+  background:var(--card2);border:1px solid var(--fuerza);border-radius:14px;
+  padding:14px 17px;display:flex;align-items:center;gap:14px;z-index:75;}
+.timer .tv{font-size:27px;font-weight:800;font-variant-numeric:tabular-nums;min-width:74px;}
+.timer .tl{flex:1;font-size:12.5px;color:var(--dim);}
+.timer button{background:none;border:1px solid var(--line);color:var(--dim);
+  border-radius:9px;padding:9px 13px;font-size:12px;min-height:40px;}
+
+/* ---------- gráficas y progreso ---------- */
+.chart{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:15px;margin-bottom:12px;}
+.chart h4{margin:0 0 3px;font-size:14.5px;font-weight:700;}
+.chart .cs{font-size:12px;color:var(--dim2);margin-bottom:12px;}
+.chart svg{width:100%;height:auto;display:block;}
+.chart .empty{color:var(--dim2);font-size:13px;padding:22px 0;text-align:center;}
+.grid30{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:6px;}
+.grid30 div{aspect-ratio:1;border-radius:4px;background:var(--bg2);border:1px solid var(--line);}
+.stats{display:flex;gap:9px;margin-bottom:12px;}
+.stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 10px;text-align:center;}
+.stat .sv{font-size:25px;font-weight:800;line-height:1.1;}
+.stat .sl{font-size:10.5px;color:var(--dim2);text-transform:uppercase;
+  letter-spacing:.5px;font-weight:700;margin-top:4px;}
+
+/* ---------- varios ---------- */
+h2{font-size:20px;font-weight:800;margin:0 0 3px;letter-spacing:-.4px;}
+.lead{font-size:13px;color:var(--dim);margin-bottom:18px;}
+h3{font-size:12px;margin:24px 0 10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--dim2);}
+.note{background:var(--card2);border-left:3px solid var(--fuerza);border-radius:10px;
+  padding:13px 15px;font-size:13px;color:var(--dim);line-height:1.6;margin:12px 0;}
+.note b{color:var(--tx);}
+.note.bad{border-left-color:var(--bad);}
+.note.warn{border-left-color:var(--pelvi);}
+.cfgrow{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;margin-bottom:9px;}
+.cfgrow .ct{font-size:15px;font-weight:700;margin-bottom:3px;}
+.cfgrow .cd{font-size:12px;color:var(--dim2);margin-bottom:11px;line-height:1.45;}
+.seg{display:flex;gap:6px;}
+.seg button{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--dim2);
+  border-radius:9px;padding:11px 4px;font-size:12.5px;font-weight:700;min-height:44px;}
+.seg button.on{background:var(--fuerza);border-color:var(--fuerza);color:#08131F;}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));
+  background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;z-index:80;font-size:13.5px;}
+.toast button{background:none;border:0;color:var(--fuerza);font-weight:800;font-size:13.5px;
+  padding:6px 4px;min-height:40px;}
+.done-all{background:linear-gradient(135deg,rgba(95,201,141,.16),rgba(95,201,141,.05));
+  border:1px solid var(--movil);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:14px;}
+.done-all .t{font-size:17px;font-weight:800;color:var(--movil);}
+.done-all .s{font-size:13px;color:var(--dim);margin-top:5px;}
+ul{margin:0 0 12px;padding-left:19px;}
+li{font-size:13.5px;color:var(--dim);margin-bottom:7px;line-height:1.55;}
+li b{color:var(--tx);}
+p{font-size:13.5px;color:var(--dim);line-height:1.6;margin:0 0 12px;}
+p b{color:var(--tx);}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Protocolo integral</h1>
-  <div class="sub" id="today"></div>
+  <div class="htop">
+    <div class="hinfo">
+      <div class="hday" id="hday">—</div>
+      <div class="hsub" id="hsub">—</div>
+    </div>
+    <div class="ring" id="ring"></div>
+  </div>
+  <div class="dsel" id="dsel"></div>
 </header>
 
-<nav id="nav"></nav>
+<main id="main"></main>
 
-<main>
-  <section id="s-hoy"></section>
-  <section id="s-entreno"></section>
-  <section id="s-cuello"></section>
-  <section id="s-pelvico"></section>
-  <section id="s-mio"></section>
-  <section id="s-movilidad"></section>
-  <section id="s-guia"></section>
-</main>
+<nav class="tabs" id="tabs"></nav>
+
+<div id="layer"></div>
 
 <script>
 "use strict";
 
-/* ---------- utilidades ---------- */
-function dayKey(){
-  var d = new Date();
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-}
-function load(k){
-  try{
-    var raw = localStorage.getItem(k);
-    return raw ? JSON.parse(raw) : {};
-  }catch(e){ return {}; }
-}
-function save(k,v){
-  try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){}
-}
-function getState(){ return load("proto_" + dayKey()); }
-function setState(s){ save("proto_" + dayKey(), s); }
-function esc(s){
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+/* ============================================================
+   1. ALMACENAMIENTO
+   ============================================================ */
+function pad(n){ return (n<10?"0":"")+n; }
+function iso(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function today(){ return iso(new Date()); }
+function todayIdx(){ var d=new Date().getDay(); return d===0?6:d-1; }
+function dateOfIdx(i){ var d=new Date(); d.setDate(d.getDate()+(i-todayIdx())); return d; }
+function rd(k,f){ try{var r=localStorage.getItem(k);return r?JSON.parse(r):f;}catch(e){return f;} }
+function wr(k,v){ try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;} }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function daysBetween(a,b){
+  var d1=new Date(a+"T00:00:00"), d2=new Date(b+"T00:00:00");
+  return Math.floor((d2-d1)/86400000);
 }
 
-/* ---------- datos: entrenamiento ---------- */
-var TRAIN = {
-  "upper1": {
-    title: "Upper 1",
-    lead: "Empuje + hombro · ~75 min",
-    ex: [
-      {n:"Press banca plano", d:"4×6-8", w:1},
-      {n:"Remo con barra", d:"4×6-8", w:1},
-      {n:"Press militar mancuernas", d:"4×8-10", w:1, r:"ref. 22,5 kg/mano"},
-      {n:"Dominadas o jalón al pecho", d:"3×8-10", w:1},
-      {n:"Elevaciones laterales mancuernas", d:"4×15-20", w:1},
-      {n:"Elevaciones laterales polea baja", d:"3×15-20", w:1},
-      {n:"Curl bíceps con barra", d:"3×12-15", w:1},
-      {n:"Curl martillo", d:"3×12-15", w:1},
-      {n:"Tríceps polea con cuerda", d:"3×12-15", w:1},
-      {n:"Tríceps sobre cabeza", d:"3×12-15", w:1},
-      {n:"Face pulls", d:"3×15-20", w:0}
-    ]
-  },
-  "upper2": {
-    title: "Upper 2",
-    lead: "Tirón + brazos · ~75 min",
-    ex: [
-      {n:"Press inclinado mancuernas", d:"4×8-10", w:1},
-      {n:"Remo en polea baja", d:"4×8-10", w:1},
-      {n:"Press militar con barra", d:"3×8-10", w:1},
-      {n:"Pájaro con mancuernas", d:"3×15-20", w:1},
-      {n:"Elevación lateral en polea, inclinado", d:"3×15-20", w:1, h:"Inclina el tronco alejándote de la polea: más rango y más tensión en el punto difícil."},
-      {n:"Curl predicador o en polea", d:"3×12-15", w:1},
-      {n:"Curl bíceps barra (agarre distinto al día 1)", d:"3×12-15", w:1},
-      {n:"Fondos en paralelas", d:"3×8-10", w:1},
-      {n:"Press banca agarre cerrado", d:"3×12-15", w:1},
-      {n:"Face pulls", d:"4×15-20", w:0}
-    ]
-  },
-  "piernas": {
-    title: "Piernas",
-    lead: "Empuje + tirón completo · ~70 min",
-    ex: [
-      {n:"Sentadilla con barra", d:"4×6-8", w:1, r:"ref. 100 kg", h:"Rodilla izquierda: si aparece molestia rotuliana, baja carga. Si sigue a 90 kg, suspende el ejercicio ese día."},
-      {n:"Peso muerto rumano", d:"4×8-10", w:1, r:"ref. 70 kg, excéntrica lenta"},
-      {n:"Prensa", d:"3×12-15", w:1},
-      {n:"Curl femoral (tumbado o sentado)", d:"4×15-20", w:1},
-      {n:"Hip thrust con carga", d:"3×12-15", w:1},
-      {n:"Extensión de cuádriceps", d:"3×15-20", w:1},
-      {n:"Elevación de talones", d:"3×20", w:1},
-      {n:"Core: crunch con peso", d:"3 series", w:0},
-      {n:"Core: rueda abdominal", d:"3×15, 3-5 s", w:0},
-      {n:"Core: elevación de piernas", d:"3 series", w:0},
-      {n:"Bicicleta", d:"20 min", w:0}
-    ]
-  }
+var DEF_CFG = {
+  cuello:1, pelv:1, mio:0, mov:1,
+  pelvStart:null, mioStart:null, autoPhase:1,
+  plan:["upperA","lowerA","upperB","lowerB","upperC","off","off"]
 };
-var TRAIN_ORDER = ["upper1","upper2","piernas"];
+function cfg(){ var c=rd("cfg",null); if(!c) return JSON.parse(JSON.stringify(DEF_CFG));
+  for(var k in DEF_CFG) if(!(k in c)) c[k]=DEF_CFG[k];
+  return c; }
+function setCfg(c){ wr("cfg",c); }
 
-/* ---------- datos: cuello ---------- */
-var CUELLO_PRE = [
-  {n:"Chin tuck tumbado", d:"3×10, mantener 10 s",
-   h:"Boca arriba, rodillas flexionadas. Asentimiento suave como diciendo sí, sin levantar la cabeza. No debe activarse el esternocleidomastoideo. Es el ejercicio con mejor evidencia de todos."},
-  {n:"Chin tuck de pie contra pared", d:"3×10, mantener 3 s",
-   h:"Versión funcional. Lleva la barbilla atrás sin inclinar la cabeza, occipucio buscando la pared."},
-  {n:"Retracción escapular", d:"2×12",
-   h:"Junta los omóplatos sin encoger los hombros. Activación antes de press y remo."}
-];
-var CUELLO_POST = [
-  {n:"Isométricos en 4 direcciones", d:"3 rondas, 5-8 s cada una",
-   h:"Mano contra frente, cada lateral y nuca. La cabeza no se mueve."},
-  {n:"Estiramiento suboccipital", d:"2-3×30 s",
-   h:"Barbilla al pecho, manos guiando suavemente la coronilla hacia abajo."},
-  {n:"Estiramiento trapecio superior", d:"30 s por lado",
-   h:"Inclina la cabeza a un lado, mano del mismo lado tirando suavemente."},
-  {n:"Estiramiento elevador de la escápula", d:"30 s por lado",
-   h:"Gira la cabeza hacia la axila del mismo lado, mira hacia abajo, y con esa misma mano presiona muy suave la parte de atrás de la cabeza."},
-  {n:"Movilidad torácica en foam roller", d:"2 min",
-   h:"Extensión sobre el rodillo en la dorsal alta. Una dorsal rígida obliga al cuello a compensar."}
-];
+function dayState(dk){ return rd("d_"+dk,{}); }
+function setDayState(dk,s){ wr("d_"+dk,s); }
 
-/* ---------- datos: suelo pélvico ---------- */
-var PELVICO = {
-  1: {
-    label:"Fase 1 · semanas 1-2",
-    pos:"Tumbado boca arriba, rodillas flexionadas",
-    ex:[
-      {n:"Contracciones sostenidas", d:"3×10, mantener 3 s, descanso 5 s"}
-    ]
-  },
-  2: {
-    label:"Fase 2 · semanas 3-6",
-    pos:"Sentado",
-    ex:[
-      {n:"Contracciones sostenidas", d:"3×10, mantener 5-8 s"},
-      {n:"Contracciones rápidas", d:"1×20, 1 s cada una"}
-    ]
-  },
-  3: {
-    label:"Fase 3 · semanas 7-12",
-    pos:"De pie, la posición más exigente",
-    ex:[
-      {n:"Contracciones sostenidas", d:"3×10, mantener 10 s"},
-      {n:"Contracciones rápidas", d:"2×20, 1 s cada una"},
-      {n:"Contracción en movimiento", d:"10 repeticiones",
-       h:"Al levantarte de la silla, al iniciar una repetición. Es la transferencia funcional."}
-    ]
-  }
+function metrics(){ return rd("metrics",{}); }
+function setMetric(dk,field,val){
+  var m=metrics(); if(!m[dk]) m[dk]={}; 
+  if(val===null||val==="") delete m[dk][field]; else m[dk][field]=val;
+  wr("metrics",m);
+}
+function exLog(id){ return rd("ex_"+id,[]); }
+function pushExLog(id,entry){
+  var l=exLog(id);
+  l=l.filter(function(e){ return e.d!==entry.d; });
+  l.push(entry); l.sort(function(a,b){ return a.d<b.d?-1:1; });
+  if(l.length>60) l=l.slice(-60);
+  wr("ex_"+id,l);
+}
+function painLog(){ return rd("pain",[]); }
+function addPain(p){ var l=painLog(); l.push(p); if(l.length>120) l=l.slice(-120); wr("pain",l); }
+
+/* fases automáticas a partir de la fecha de inicio */
+function phaseOf(which){
+  var c=cfg();
+  var manual = which==="pelv" ? c.pelv : c.mio;
+  if(!manual) return 0;
+  if(!c.autoPhase) return manual;
+  var start = which==="pelv" ? c.pelvStart : c.mioStart;
+  if(!start) return manual;
+  var n = daysBetween(start, today());
+  if(n<0) return 1;
+  if(which==="pelv") return n<14?1:(n<42?2:3);       /* 2 sem / 6 sem */
+  return n<30?1:(n<60?2:3);                           /* meses */
+}
+
+/* ============================================================
+   2. CONTENIDO
+   ============================================================ */
+var DOM = {
+  fuerza:{c:"var(--fuerza)",n:"Fuerza"},
+  movil:{c:"var(--movil)",n:"Movilidad"},
+  aire:{c:"var(--aire)",n:"Vía aérea"},
+  pelvi:{c:"var(--pelvi)",n:"Suelo pélvico"},
+  reg:{c:"var(--reg)",n:"Registro"}
 };
 
-/* ---------- datos: miofuncional ---------- */
-var MIO = {
-  1: {
-    label:"Fase 1 · mes 1",
-    groups:[
-      {t:"Labios", ex:[
-        {n:"Abrir y cerrar la boca al máximo", d:"×10", h:"Los labios deben juntarse al cerrar."},
-        {n:"Fruncir los labios como para besar", d:"×10, mantener 10 s"},
-        {n:"Sonrisa exagerada y mantener", d:"×10"}
-      ]},
-      {t:"Lengua", ex:[
-        {n:"Cepillar la superficie superior y lateral de la lengua", d:"×10", h:"Con el cepillo de dientes, lengua apoyada en el suelo de la boca."},
-        {n:"Punta de la lengua al paladar anterior, deslizar hacia atrás", d:"×10"},
-        {n:"Sacar la lengua recta al frente y mantener", d:"×10", h:"Recta, sin desviarse a un lado. Cada día un poco más lejos."},
-        {n:"Sacar y meter la lengua lo más rápido posible", d:"×10"},
-        {n:"Lengua de comisura a comisura y círculo por los labios", d:"×10", h:"Rápido y sin perder contacto con los labios."}
-      ]},
-      {t:"Mandíbula", ex:[
-        {n:"Abrir y cerrar la boca rápido", d:"×10", h:"Los labios se juntan cada vez."},
-        {n:"Decir ma-ma-ma-ma y luego la-la-la-la", d:"×10", h:"Rápido, marcando la eme y la a cada vez."},
-        {n:"Masticar alternando lados y tragar", d:"×10", h:"Lengua en el paladar, dientes cerrados, sin contraer alrededor de la boca."}
-      ]}
-    ]
-  },
-  2: {
-    label:"Fase 2 · mes 2",
-    groups:[
-      {t:"Labios", ex:[
-        {n:"Fruncir, mantener, sonreír, mantener", d:"×10"},
-        {n:"Apretar los labios fuertemente cerrados", d:"×10"}
-      ]},
-      {t:"Lengua", ex:[
-        {n:"Sacar la lengua buscando la barbilla", d:"×10, mantener en extensión máxima"}
-      ]},
-      {t:"Mandíbula", ex:[
-        {n:"Decir ka-ka-ka-ka", d:"×10", h:"Rápido y con articulación clara."},
-        {n:"Decir kala-kala-kala-kala", d:"×10"}
-      ]},
-      {t:"Paladar blando — lo más importante de esta fase", ex:[
-        {n:"Elevación palatina con y sin bostezo", d:"×10", h:"Para notar conscientemente el ascenso del velo."},
-        {n:"Vocal abierta intermitente (isotónico)", d:"×10"},
-        {n:"Vocal abierta sostenida (isométrico)", d:"×10"}
-      ]},
-      {t:"Buccinador y pterigoideos", ex:[
-        {n:"Succión contrayendo solo el buccinador", d:"×10"},
-        {n:"Empujar la mejilla hacia fuera contra el dedo", d:"×10", h:"Dedo limpio dentro de la boca, el músculo empuja hacia fuera."},
-        {n:"Movimientos laterales de mandíbula", d:"×10"},
-        {n:"Inspiración nasal forzada y espiración oral con vocal", d:"×10", h:"Sentado."}
-      ]}
-    ]
-  },
-  3: {
-    label:"Fase 3 · mes 3 — la que más rinde",
-    groups:[
-      {t:"Buccinador", ex:[
-        {n:"Inflar un globo", d:"5 veces seguidas", h:"Inspiración nasal prolongada y soplido forzado, sin sacarte el globo de la boca entre repeticiones."}
-      ]},
-      {t:"Pterigoideos", ex:[
-        {n:"Elevación alternada de mandíbula adelante y lados", d:"×10"},
-        {n:"Cantar las vocales A-E-I-O-U", d:"×10", h:"Lo más fuerte que te atrevas."}
-      ]},
-      {t:"Lengua", ex:[
-        {n:"Empujar una cuchara con la punta de la lengua", d:"×10", h:"Cuchara de canto contra la punta, la mano resiste."},
-        {n:"Succión forzada de toda la lengua contra el paladar", d:"×10"}
-      ]},
-      {t:"Labios", ex:[
-        {n:"Fruncir con la boca abierta sin juntar mandíbulas", d:"×10, mantener"},
-        {n:"Cerrar los labios y hacer ruido de sorber", d:"×10"}
-      ]}
-    ]
-  }
-};
-
-/* ---------- datos: movilidad ---------- */
-var MOV = {
-  cadera:[
-    {n:"Psoas en zancada", d:"2×60 s por lado",
-     h:"Rodilla en el suelo. Mete el coxis hacia abajo (retroversión pélvica) antes de empujar la cadera adelante. Sin ese detalle no estiras el psoas, arqueas la lumbar."},
-    {n:"90/90", d:"2×60 s por lado + 10 rotaciones",
-     h:"Sentado, una pierna delante a 90 grados, la otra al lado a 90. Inclínate sobre la delantera. Alterna lados rotando sin usar las manos."},
-    {n:"Rana", d:"2×90 s",
-     h:"A cuatro patas, rodillas abiertas al máximo, tibias paralelas. Desplaza la cadera hacia atrás. Es el ejercicio clave para el spagat lateral."},
-    {n:"Mariposa con presión", d:"2×60 s",
-     h:"Plantas juntas, codos empujando las rodillas hacia el suelo."}
+/* calentamientos específicos */
+var WARM = {
+  upper:[
+    {id:"w_band",n:"Rotación externa con banda",s:"2×15 por lado",
+     h:"Codo pegado al costado. Prepara el manguito rotador antes de cualquier press."},
+    {id:"w_scap",n:"Dislocaciones con palo o banda",s:"2×12",
+     h:"Agarre ancho, movimiento lento. Abre el hombro sin forzar."},
+    {id:"w_pushup",n:"Flexiones escapulares",s:"2×12",
+     h:"En plancha, solo junta y separa los omóplatos sin doblar los codos."},
+    {id:"w_serie",n:"Serie de aproximación del primer ejercicio",s:"2 series ligeras",
+     h:"50% y 70% del peso de trabajo. No cuenta como serie efectiva."}
   ],
-  isquios:[
-    {n:"Estiramiento con banda, técnica PNF contraer-relajar", d:"2 rondas × 4 ciclos por pierna",
-     h:"Tumbado, banda en el pie, pierna recta. Llevas al punto de tensión, empujas contra la banda al 20-30% de fuerza durante 6 s, sueltas y ganas rango. Repite 4 veces."},
-    {n:"Good morning con barra ligera", d:"3×10",
-     h:"Rango completo, poco peso. El entrenamiento de fuerza en rango completo mejora la flexibilidad de forma comparable al estiramiento."}
-  ],
-  espalda:[
-    {n:"Cat-cow", d:"10 repeticiones lentas"},
-    {n:"Rotación torácica 90/90 tumbado de lado", d:"10 por lado",
-     h:"También cuenta para el bloque de cuello: la rigidez dorsal obliga al cuello a compensar."},
-    {n:"Extensión torácica en foam roller", d:"2 min"},
-    {n:"Child's pose con alcance lateral", d:"60 s por lado"}
-  ],
-  spagat:[
-    {n:"Spagat frontal sobre bloques", d:"90 s por lado",
-     h:"Una vez por semana, al final de la sesión. Manos apoyadas en bloques o libros. Anota la altura cada mes: ese es tu marcador."},
-    {n:"Spagat lateral sobre bloques", d:"90 s",
-     h:"Si notas un tope duro en la ingle en vez de estiramiento muscular, es hueso. Ahí se para."}
+  piernas:[
+    {id:"w_bike",n:"Bicicleta suave",s:"5 min",t:300,
+     h:"Solo para subir temperatura, sin intensidad."},
+    {id:"w_ankle",n:"Movilidad de tobillo contra pared",s:"2×10 por lado",
+     h:"Rodilla sobrepasando la punta del pie sin despegar el talón. Condiciona la profundidad de sentadilla."},
+    {id:"w_hip90",n:"90/90 dinámico",s:"10 rotaciones por lado"},
+    {id:"w_glute",n:"Puente de glúteo",s:"2×15",
+     h:"Activación previa. Un glúteo dormido hace que el cuádriceps y la rodilla asuman de más."},
+    {id:"w_sq",n:"Series de aproximación de sentadilla",s:"3 series",
+     h:"Barra vacía, 50% y 75%. Con la rodilla izquierda en observación, esto no es opcional."}
   ]
 };
 
-/* ---------- render de items ---------- */
-var uid = 0;
-function itemHTML(ex, key, withWeight){
-  var st = getState();
-  var done = !!st[key];
-  var val = st["w_"+key] || "";
-  var h = '<div class="item">';
-  h += '<div class="txt">';
-  h += '<div class="nm">' + esc(ex.n) + '</div>';
-  if(ex.d) h += '<div class="dt">' + esc(ex.d) + '</div>';
-  if(ex.h) h += '<div class="hint">' + esc(ex.h) + '</div>';
-  if(withWeight){
-    h += '<div class="wr"><label>Peso</label>';
-    h += '<input type="text" inputmode="decimal" placeholder="kg" value="' + esc(val) + '" data-w="' + key + '">';
-    if(ex.r) h += '<span class="ref">' + esc(ex.r) + '</span>';
-    h += '</div>';
-  }
-  h += '</div>';
-  h += '<button class="chk' + (done ? ' done' : '') + '" data-c="' + key + '" aria-label="Marcar"></button>';
-  h += '</div>';
-  return h;
-}
-function listHTML(arr, prefix, withWeight){
-  var h = "";
-  for(var i=0;i<arr.length;i++){
-    h += itemHTML(arr[i], prefix + "_" + i, withWeight && arr[i].w === 1);
-  }
-  return h;
-}
-function progressHTML(prefix, count){
-  var st = getState(), n = 0;
-  for(var i=0;i<count;i++){ if(st[prefix+"_"+i]) n++; }
-  var pct = count ? (n/count*100) : 0;
-  return '<div class="bar"><div style="width:' + pct + '%"></div></div>';
-}
+var ENT = {
+  upperA:{t:"Upper A",sub:"Fuerza y empuje",mins:70,warm:"upper",ex:[
+    {id:"press_banca",n:"Press banca plano",s:"4×6-8",sets:4,w:1,tipo:"comp"},
+    {id:"press_mil_barra",n:"Press militar con barra",s:"4×6-8",sets:4,w:1,tipo:"comp"},
+    {id:"press_incl_manc",n:"Press inclinado mancuernas",s:"3×8-10",sets:3,w:1,tipo:"comp"},
+    {id:"lat_manc_A",n:"Elevaciones laterales mancuernas",s:"4×15-20",sets:4,w:1,tipo:"ais"},
+    {id:"lat_polea_A",n:"Elevaciones laterales polea baja",s:"3×15-20",sets:3,w:1,tipo:"ais"},
+    {id:"tri_cuerda",n:"Tríceps polea con cuerda",s:"3×15-20",sets:3,w:1,tipo:"ais"},
+    {id:"tri_cabeza",n:"Tríceps sobre cabeza",s:"3×12-15",sets:3,w:1,tipo:"ais"},
+    {id:"face_pulls_A",n:"Face pulls",s:"4×15-20",sets:4,w:0,tipo:"ais",
+     h:"Obligatorios en los tres días de Upper. Son deltoides posterior y postura cervical a la vez."}
+  ]},
+  lowerA:{t:"Lower A",sub:"Cuádriceps",mins:70,warm:"piernas",ex:[
+    {id:"sentadilla",n:"Sentadilla con barra",s:"4×6-8",sets:4,w:1,tipo:"comp",r:"100 kg",
+     h:"Rodilla izquierda en observación. Si aparece molestia rotuliana baja carga; si persiste a 90 kg, registra la molestia y pasa al resto de la sesión."},
+    {id:"prensa",n:"Prensa",s:"3×12-15",sets:3,w:1,tipo:"comp"},
+    {id:"ext_cuad",n:"Extensión de cuádriceps",s:"3×15-20",sets:3,w:1,tipo:"ais"},
+    {id:"curl_fem_tumb",n:"Curl femoral tumbado",s:"4×15-20",sets:4,w:1,tipo:"ais"},
+    {id:"talones_pie",n:"Elevación de talones de pie",s:"3×20",sets:3,w:1,tipo:"ais"},
+    {id:"crunch_peso",n:"Core · crunch con peso",s:"3×15",sets:3,w:1,tipo:"ais"},
+    {id:"crunch_lat",n:"Core · crunch lateral con mancuerna",s:"3×15 por lado",sets:3,w:1,tipo:"ais"},
+    {id:"plancha",n:"Core · plancha",s:"3×45 s",sets:3,w:0,tipo:"ais",t:45},
+    {id:"elev_piernas_A",n:"Core · elevación de piernas",s:"3×15",sets:3,w:0,tipo:"ais"},
+    {id:"bici_A",n:"Bicicleta",s:"20 min",sets:1,w:0,tipo:"ais",t:1200,
+     h:"Obligatoria los días de pierna. Parte del objetivo de definición sin volumen excesivo."}
+  ]},
+  upperB:{t:"Upper B",sub:"Tirón, hombro y brazos",mins:75,warm:"upper",ex:[
+    {id:"dominadas",n:"Dominadas o jalón al pecho",s:"4×6-8",sets:4,w:1,tipo:"comp"},
+    {id:"remo_barra",n:"Remo con barra",s:"4×6-8",sets:4,w:1,tipo:"comp"},
+    {id:"remo_polea",n:"Remo en polea baja",s:"3×15-20",sets:3,w:1,tipo:"comp"},
+    {id:"lat_manc_B",n:"Elevaciones laterales mancuernas",s:"4×15-20",sets:4,w:1,tipo:"ais"},
+    {id:"pajaro_B",n:"Pájaro con mancuernas",s:"3×15-20",sets:3,w:1,tipo:"ais"},
+    {id:"curl_barra",n:"Curl bíceps con barra",s:"4×15-20",sets:4,w:1,tipo:"ais"},
+    {id:"curl_predicador",n:"Curl predicador o en polea",s:"3×12-15",sets:3,w:1,tipo:"ais"},
+    {id:"curl_martillo",n:"Curl martillo",s:"3×12-15",sets:3,w:1,tipo:"ais"},
+    {id:"face_pulls_B",n:"Face pulls",s:"5×15-20",sets:5,w:0,tipo:"ais"},
+    {id:"dead_hang",n:"Dead hangs",s:"3×30-45 s",sets:3,w:0,tipo:"ais",t:40,
+     h:"Agarre y antebrazo. Aprovecha que hoy ya hay barra, y prepara la escalada."}
+  ]},
+  lowerB:{t:"Lower B",sub:"Isquiotibial",mins:70,warm:"piernas",ex:[
+    {id:"pm_convencional",n:"Peso muerto convencional",s:"4×5-6",sets:4,w:1,tipo:"comp",r:"110 kg"},
+    {id:"pm_rumano",n:"Peso muerto rumano",s:"3×8-10",sets:3,w:1,tipo:"comp",r:"70 kg, excéntrica lenta"},
+    {id:"curl_fem_sent",n:"Curl femoral sentado",s:"4×15-20",sets:4,w:1,tipo:"ais"},
+    {id:"hip_thrust",n:"Hip thrust con carga",s:"3×12-15",sets:3,w:1,tipo:"comp"},
+    {id:"talones_sent",n:"Elevación de talones sentado",s:"4×20",sets:4,w:1,tipo:"ais"},
+    {id:"elev_piernas_B",n:"Core · elevación de piernas",s:"3×15",sets:3,w:0,tipo:"ais"},
+    {id:"rueda_ab",n:"Core · rueda abdominal",s:"3×15, mantener 3-5 s",sets:3,w:0,tipo:"ais"},
+    {id:"dead_bug",n:"Core · dead bug",s:"3×12 por lado",sets:3,w:0,tipo:"ais"},
+    {id:"farmer",n:"Farmer's carry",s:"3×25 m",sets:3,w:1,tipo:"comp",r:"empieza con 20-24 kg/mano",
+     h:"Agarre, antebrazo, trapecio y core a la vez. Camina erguido; si el agarre falla antes de los 20 m, baja peso."},
+    {id:"bici_B",n:"Bicicleta",s:"20 min",sets:1,w:0,tipo:"ais",t:1200}
+  ]},
+  upperC:{t:"Upper C",sub:"Hombro, brazos y complemento",mins:75,warm:"upper",ex:[
+    {id:"press_mil_manc",n:"Press militar mancuernas",s:"4×8-10",sets:4,w:1,tipo:"comp",r:"22,5 kg/mano"},
+    {id:"lat_manc_C",n:"Elevaciones laterales mancuernas",s:"5×15-20",sets:5,w:1,tipo:"ais",
+     h:"Cinco series. El deltoides medio es la prioridad del físico que buscas: 19 series semanales entre los tres Upper."},
+    {id:"lat_polea_C",n:"Elevación lateral en polea, inclinado",s:"3×15-20",sets:3,w:1,tipo:"ais",
+     h:"Inclina el tronco alejándote de la polea: más rango y más tensión donde el músculo está más corto."},
+    {id:"pajaro_C",n:"Pájaro con mancuernas",s:"3×15-20",sets:3,w:1,tipo:"ais"},
+    {id:"fondos",n:"Fondos en paralelas",s:"3×8-10",sets:3,w:1,tipo:"comp"},
+    {id:"press_cerrado",n:"Press banca agarre cerrado",s:"3×8-10",sets:3,w:1,tipo:"comp"},
+    {id:"curl_barra_C",n:"Curl bíceps con barra",s:"3×15-20",sets:3,w:1,tipo:"ais"},
+    {id:"curl_martillo_C",n:"Curl martillo",s:"3×12-15",sets:3,w:1,tipo:"ais"},
+    {id:"face_pulls_C",n:"Face pulls",s:"5×15-20",sets:5,w:0,tipo:"ais"},
+    {id:"curl_muneca",n:"Curl de muñeca y curl inverso",s:"3×15-20 cada uno",sets:3,w:1,tipo:"ais",
+     h:"Flexores y extensores del antebrazo. El inverso equilibra y previene problemas de codo."}
+  ]}
+};
 
-/* ---------- secciones ---------- */
-var trainSel = "upper1";
-var mioSel = 1;
-var pelvSel = 1;
-
-function renderHoy(){
-  var h = '<h2>Hoy</h2><div class="lead">Cómo encaja todo en el día</div>';
-
-  h += '<div class="note"><b>No arranques todo a la vez.</b> Orden recomendado: primero cuello (ya rodado), luego suelo pélvico, luego miofuncional al terminar el antibiótico, y movilidad al volver al gimnasio con normalidad. Cinco protocolos el mismo día se abandonan en dos semanas.</div>';
-
-  h += '<h3>Día de Upper</h3>';
-  h += '<div class="day-card"><h4>Antes de entrenar · 4 min</h4><p>Cuello, bloque de activación: chin tucks y retracción escapular. Mejora la posición escapular en press y remo.</p></div>';
-  h += '<div class="day-card"><h4>Después · 15 min</h4><p>Cuello, bloque de estiramiento. Movilidad torácica y de cadera.</p></div>';
-  h += '<div class="day-card"><h4>Noche</h4><p>Suelo pélvico, tanda 2.</p></div>';
-
-  h += '<h3>Día de piernas</h3>';
-  h += '<div class="day-card"><h4>Antes</h4><p>Nada de estiramiento estático. Calentamiento dinámico normal. Tampoco suelo pélvico intenso: llegarías al peso muerto con el suelo pélvico prefatigado.</p></div>';
-  h += '<div class="day-card"><h4>Después · 20 min</h4><p>Movilidad de isquios con PNF y cadera. Músculo caliente: el mejor momento de la semana para ganar rango.</p></div>';
-  h += '<div class="day-card"><h4>Noche</h4><p>Suelo pélvico, las dos tandas si no las hiciste por la mañana.</p></div>';
-
-  h += '<h3>Días sin gimnasio</h3>';
-  h += '<div class="day-card"><h4>Cuando quieras · 25 min</h4><p>Sesión completa de cuello y el grueso de movilidad. Sin fatiga previa la calidad es mejor.</p></div>';
-
-  h += '<h3>Todos los días</h3>';
-  h += '<div class="day-card"><h4>Miofuncional</h4><p>3-4 tandas de 10 min en huecos: coche, ducha, cocinando, entre tareas. Cero interferencia con nada.</p></div>';
-  h += '<div class="day-card"><h4>Suelo pélvico</h4><p>Mañana y noche. Es invisible, nadie lo nota.</p></div>';
-
-  h += '<h3>Checklist de hoy</h3>';
-  var daily = [
-    {n:"Cuello — bloque completo", d:"8-10 min"},
-    {n:"Suelo pélvico — tanda mañana", d:""},
-    {n:"Suelo pélvico — tanda noche", d:""},
-    {n:"Miofuncional — tanda 1", d:""},
-    {n:"Miofuncional — tanda 2", d:""},
-    {n:"Miofuncional — tanda 3", d:""},
-    {n:"Movilidad", d:"15-20 min"},
-    {n:"Dormir de lado, no boca arriba", d:"", h:"Con colapso faríngeo, la postura supina empeora el cierre por gravedad. Puede tener más impacto inmediato que todos los ejercicios juntos."}
-  ];
-  h += progressHTML("hoy", daily.length);
-  h += listHTML(daily, "hoy", false);
-  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
-  return h;
-}
-
-function renderEntreno(){
-  var d = TRAIN[trainSel];
-  var h = '<h2>Entrenamiento</h2><div class="lead">3 días · 2 Upper + 1 Piernas</div>';
-  h += '<div class="phase-sel">';
-  for(var i=0;i<TRAIN_ORDER.length;i++){
-    var k = TRAIN_ORDER[i];
-    h += '<button data-train="' + k + '" class="' + (k===trainSel?'on':'') + '">' + esc(TRAIN[k].title) + '</button>';
-  }
-  h += '</div>';
-  h += '<h2>' + esc(d.title) + '</h2><div class="lead">' + esc(d.lead) + '</div>';
-  h += progressHTML("tr_"+trainSel, d.ex.length);
-  h += listHTML(d.ex, "tr_"+trainSel, true);
-  h += '<div class="note"><b>Descansos.</b> Compuestos pesados 90-120 s. Aislamiento con series de 15-20 repeticiones, 45-60 s: quieres mantener fatiga acumulada para maximizar la congestión.</div>';
-  h += '<div class="note warn"><b>Separación entre sesiones.</b> Los dos días de Upper necesitan 48 h entre ellos. Si solo tienes martes, miércoles y jueves: Upper 1 el martes, Piernas el miércoles, Upper 2 el jueves. Nunca los dos Upper seguidos.</div>';
-  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
-  return h;
-}
-
-function renderCuello(){
-  var h = '<h2>Cuello y postura</h2><div class="lead">Rectificación cervical · cefalea tensional · diario</div>';
-  h += '<div class="note bad"><b>Protrusiones C5-C7.</b> Nada de flexión cervical forzada bajo carga, ni rotaciones bruscas, ni círculos completos de cuello. Si algo genera hormigueo o dolor que baja al brazo, paras y lo comentas en consulta.</div>';
-
-  h += '<h3><span class="tag pre">Antes de entrenar</span></h3>';
-  h += progressHTML("cu_pre", CUELLO_PRE.length);
-  h += listHTML(CUELLO_PRE, "cu_pre", false);
-
-  h += '<h3><span class="tag post">Después de entrenar</span></h3>';
-  h += progressHTML("cu_post", CUELLO_POST.length);
-  h += listHTML(CUELLO_POST, "cu_post", false);
-
-  h += '<div class="note"><b>Qué esperar.</b> La evidencia es sólida para dolor, resistencia muscular y ángulo craneovertebral con entrenamiento de flexores profundos. Para revertir la rectificación en radiografía es mucho más débil. Objetivo realista: menos dolor de cabeza y mejor postura funcional.</div>';
-  h += '<div class="note"><b>Hábito diario.</b> Pantalla y móvil a la altura de los ojos. Es lo que más contribuye día a día a la pérdida de curvatura.</div>';
-  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
-  return h;
-}
-
-function renderPelvico(){
-  var f = PELVICO[pelvSel];
-  var h = '<h2>Suelo pélvico</h2><div class="lead">12 semanas · dos veces al día</div>';
-
-  h += '<div class="note"><b>Identificación correcta.</b> Contrae como si aguantaras un gas y a la vez cortaras el pis. Debes notar la base del pene y el perineo elevarse. Sin apretar glúteos, sin apretar abdomen, sin contener la respiración. Delante del espejo, la base del pene se mueve ligeramente hacia arriba.</div>';
-  h += '<div class="note bad"><b>Nunca durante la micción.</b> Cortar el chorro sirve para identificar el músculo la primera vez, no como entrenamiento. Repetirlo habitualmente puede dejar vaciado incompleto de vejiga y alterar la coordinación vejiga-esfínter.</div>';
-
-  h += '<div class="phase-sel">';
-  for(var k=1;k<=3;k++){
-    h += '<button data-pelv="' + k + '" class="' + (k===pelvSel?'on':'') + '">Fase ' + k + '</button>';
-  }
-  h += '</div>';
-
-  h += '<h2>' + esc(f.label) + '</h2><div class="lead">' + esc(f.pos) + '</div>';
-  h += progressHTML("pv_"+pelvSel, f.ex.length);
-  h += listHTML(f.ex, "pv_"+pelvSel, false);
-
-  h += '<div class="note warn"><b>La relajación importa tanto como la contracción.</b> Un suelo pélvico hipertónico da los mismos problemas que uno débil. Entre contracciones, suelta del todo. Si notas molestia perineal, dolor al sentarte o urgencia urinaria, estás sobreentrenando: para una semana.</div>';
-  h += '<div class="note"><b>Plazos.</b> 4-6 semanas: mejor control eyaculatorio. 8-12 semanas: erecciones más firmes y duraderas. 3-6 meses: beneficio máximo. En el ensayo de referencia, a seis meses el 40% recuperó función normal y el 35,5% mejoró.</div>';
-  h += '<div class="note"><b>Y sirve para lo otro.</b> Es el mismo músculo que se entrena para separar orgasmo de eyaculación. Un suelo pélvico fuerte y con buen control voluntario es el requisito previo.</div>';
-  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
-  return h;
-}
-
-function renderMio(){
-  var f = MIO[mioSel];
-  var h = '<h2>Terapia miofuncional</h2><div class="lead">Ronquido y colapso faríngeo · 3 meses</div>';
-
-  h += '<div class="note"><b>Dosis.</b> Cada ejercicio 10 repeticiones. El conjunto, 3-5 veces al día, unos 10 minutos por tanda. Aprovecha tiempos muertos. Cada fase dura un mes.</div>';
-
-  h += '<div class="phase-sel">';
-  for(var k=1;k<=3;k++){
-    h += '<button data-mio="' + k + '" class="' + (k===mioSel?'on':'') + '">Fase ' + k + '</button>';
-  }
-  h += '</div>';
-
-  h += '<h2>' + esc(f.label) + '</h2>';
-
-  var total = 0, idx = 0;
-  for(var g=0; g<f.groups.length; g++){ total += f.groups[g].ex.length; }
-  h += progressHTML("mio_"+mioSel, total);
-
-  for(var g2=0; g2<f.groups.length; g2++){
-    var grp = f.groups[g2];
-    h += '<h3>' + esc(grp.t) + '</h3>';
-    for(var e=0; e<grp.ex.length; e++){
-      h += itemHTML(grp.ex[e], "mio_"+mioSel+"_"+idx, false);
-      idx++;
-    }
-  }
-
-  h += '<div class="note"><b>Qué mejora de verdad.</b> En el estudio por fases, a los tres meses: intensidad del ronquido de 2,8 a 1,7, somnolencia diurna resuelta en 14 de 16 pacientes, índice de arousals de 15,6 a 12,8, más tiempo en sueño profundo N3 y circunferencia de cuello reducida. El índice de apnea-hipopnea apenas se movió. Mejora la calidad del sueño y el ronquido más que el número de apneas — que es justo lo que necesitas.</div>';
-  h += '<div class="note"><b>Percepción de mejoría por fase.</b> Fase 1: 10-15%. Fase 2: 15-20%. Fase 3: 40-45%. La fase 3 es donde está casi todo el beneficio. Llegar hasta ahí es lo que decide el resultado.</div>';
-  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
-  return h;
-}
-
-function renderMovilidad(){
-  var h = '<h2>Movilidad</h2><div class="lead">Cadera · isquios · espalda · 5-6 días/semana</div>';
-
-  h += '<div class="note bad"><b>Nunca antes de entrenar fuerza.</b> El estiramiento estático reduce la producción de fuerza de forma aguda. Va después de la sesión o en otro momento del día.</div>';
-  h += '<div class="note"><b>La dosis que manda.</b> Un metaanálisis de 2024 con 189 estudios y 6.654 adultos estableció que la dosis óptima para ganancias de rango a largo plazo es de unos 10 minutos por grupo muscular y semana. Es menos de lo que la gente cree: necesitas acumular volumen semanal, no sesiones épicas.</div>';
-
-  h += '<h3><span class="tag post">Cadera</span></h3>';
-  h += progressHTML("mv_cadera", MOV.cadera.length);
-  h += listHTML(MOV.cadera, "mv_cadera", false);
-
-  h += '<h3><span class="tag post">Isquiotibiales</span></h3>';
-  h += progressHTML("mv_isquios", MOV.isquios.length);
-  h += listHTML(MOV.isquios, "mv_isquios", false);
-
-  h += '<h3><span class="tag any">Espalda</span></h3>';
-  h += progressHTML("mv_espalda", MOV.espalda.length);
-  h += listHTML(MOV.espalda, "mv_espalda", false);
-
-  h += '<h3><span class="tag any">Spagat · una vez por semana</span></h3>';
-  h += progressHTML("mv_spagat", MOV.spagat.length);
-  h += listHTML(MOV.spagat, "mv_spagat", false);
-
-  h += '<div class="note warn"><b>Rodilla izquierda.</b> Nada de esto debería tocarla, pero si la rana o el 90/90 generan molestia rotuliana, reduce el rango. La sentadilla profunda cargada queda en pausa hasta que se aclare.</div>';
-  h += '<button class="btn" data-reset="1">Reiniciar el día</button>';
-  return h;
-}
-
-function renderGuia(){
-  var h = '<h2>Guía</h2><div class="lead">Reglas, medición y contexto clínico</div>';
-
-  h += '<h3>Las tres reglas de encaje</h3>';
-  h += '<ul>';
-  h += '<li><b>Estiramiento estático antes de fuerza: no.</b> Reduce la producción de fuerza. Movilidad siempre después.</li>';
-  h += '<li><b>Suelo pélvico y días de pierna: separados.</b> Sentadilla y peso muerto ya cargan el suelo pélvico. La tanda fuerte va por la noche esos días.</li>';
-  h += '<li><b>Cuello antes de Upper: sí.</b> Chin tucks y retracción escapular son activación, no estiramiento. Los estiramientos, después.</li>';
-  h += '</ul>';
-
-  h += '<h3>Medidas de entorno — las que más rinden</h3>';
-  h += '<ul>';
-  h += '<li><b>Dormir de lado, nunca boca arriba.</b> Truco de la pelota de tenis cosida en la espalda del pijama si te giras dormido.</li>';
-  h += '<li><b>Cabecera elevada</b> 10-15 cm.</li>';
-  h += '<li><b>Fundas antiácaros</b> en colchón y almohada, sábanas a 60 grados. Tienes IgE específica positiva a ambos dermatofagoides y es tu dormitorio.</li>';
-  h += '<li><b>Alcohol cero</b> las noches importantes: relaja la musculatura faríngea directamente.</li>';
-  h += '<li><b>Respiración nasal consciente de día.</b> Boca cerrada, lengua en el paladar. Reeduca el patrón que luego se mantiene de noche.</li>';
-  h += '</ul>';
-
-  h += '<h3>Cómo medir si funciona</h3>';
-  h += '<div class="scroll"><table>';
-  h += '<tr><th>Marcador</th><th>Cadencia</th><th>Referencia</th></tr>';
-  h += '<tr><td>Grabación de ronquidos</td><td>1 noche al mes</td><td>App gratuita. El dato más contundente para consulta.</td></tr>';
-  h += '<tr><td>Energía matutina 1-10</td><td>Diario al despertar</td><td>Tu síntoma principal. Es lo que más debería moverse.</td></tr>';
-  h += '<tr><td>Circunferencia de cuello</td><td>Mensual</td><td>En el estudio bajó de 38,4 a 37,8 cm en 3 meses.</td></tr>';
-  h += '<tr><td>Altura de bloques en spagat</td><td>Mensual</td><td>Marcador objetivo de progreso de movilidad.</td></tr>';
-  h += '<tr><td>Peso en ayunas</td><td>Diario</td><td>Objetivo lean bulk hacia 80 kg.</td></tr>';
-  h += '</table></div>';
-
-  h += '<h3>Calendario de arranque</h3>';
-  h += '<ul>';
-  h += '<li><b>Ahora, hasta terminar el antibiótico del H. pylori:</b> solo medidas de entorno y cuello. Cero esfuerzo añadido.</li>';
-  h += '<li><b>Consulta de neumología:</b> pedir derivación a logopeda para terapia miofuncional y valorar polisomnografía completa en laboratorio.</li>';
-  h += '<li><b>Semana siguiente al antibiótico:</b> arranca miofuncional fase 1 y suelo pélvico fase 1. Empieza el reloj de los 3 meses.</li>';
-  h += '<li><b>Cuatro semanas tras la última dosis:</b> test de aliento de control del H. pylori.</li>';
-  h += '<li><b>Al volver al gimnasio con normalidad:</b> entra el bloque de movilidad.</li>';
-  h += '</ul>';
-
-  h += '<h3>Expectativa honesta sobre el spagat</h3>';
-  h += '<p>El spagat lateral completo depende mucho de la arquitectura de la cadera: ángulo y profundidad del acetábulo, orientación del cuello femoral. Eso no se entrena. A los 39, lo realista en 12 meses de trabajo constante es spagat frontal cercano o completo, abducción muy por encima de la media y movilidad funcional excelente. El lateral a 180 grados puede llegar o puede que haya tope óseo. Lo sabrás cuando notes un bloqueo duro en la ingle en vez de estiramiento muscular. El 90% del camino es alcanzable y es donde está todo el beneficio real.</p>';
-
-  h += '<h3>Suplementación durante la erradicación</h3>';
-  h += '<ul>';
-  h += '<li><b>Yovis IBS</b> en ayunas, separado 2-3 h de cada toma de antibiótico.</li>';
-  h += '<li><b>Gelsectan</b> con desayuno y cena.</li>';
-  h += '<li><b>Vitamina D</b> con el desayuno, una sola fuente: o el Hidroferol mensual o el bote diario, no ambos.</li>';
-  h += '<li><b>Magnesio</b> una hora antes de dormir.</li>';
-  h += '<li><b>Fuera por ahora:</b> Rhodiola y Mariendistel. El cardo mariano enmascararía la analítica de control de transaminasas.</li>';
-  h += '<li><b>Después del tratamiento:</b> entran los Flora Essentials Plus en la fase de recolonización, despacio por los prebióticos fermentables.</li>';
-  h += '</ul>';
-
-  h += '<h3>Seguimientos abiertos</h3>';
-  h += '<ul>';
-  h += '<li>Test de aliento de control del H. pylori, 4 semanas tras el antibiótico.</li>';
-  h += '<li>Polisomnografía completa en laboratorio.</li>';
-  h += '<li>Control evolutivo de la parotiditis izquierda (ecografía de junio de 2026).</li>';
-  h += '<li>Repetir transaminasas sin entrenar los 2-3 días previos a la extracción.</li>';
-  h += '<li>Rodilla izquierda: molestia rotuliana a 120 kg que persistía a 90 kg, sin revisar.</li>';
-  h += '</ul>';
-
-  return h;
-}
-
-/* ---------- navegación ---------- */
-var TABS = [
-  {id:"hoy", label:"Hoy", fn:renderHoy},
-  {id:"entreno", label:"Entreno", fn:renderEntreno},
-  {id:"cuello", label:"Cuello", fn:renderCuello},
-  {id:"pelvico", label:"Suelo pélvico", fn:renderPelvico},
-  {id:"mio", label:"Miofuncional", fn:renderMio},
-  {id:"movilidad", label:"Movilidad", fn:renderMovilidad},
-  {id:"guia", label:"Guía", fn:renderGuia}
+var CUELLO_A = [
+  {id:"chin_tumb",n:"Chin tuck tumbado",s:"3×10, mantener 10 s",t:10,
+   h:"Boca arriba, rodillas flexionadas. Asentimiento suave como diciendo sí, sin levantar la cabeza ni tensar el cuello por delante. Es el ejercicio con mejor evidencia del bloque."},
+  {id:"chin_pie",n:"Chin tuck de pie contra pared",s:"3×10, mantener 3 s",t:3},
+  {id:"retrac",n:"Retracción escapular",s:"2×12",
+   h:"Junta los omóplatos sin encoger los hombros."}
 ];
-var current = "hoy";
+var CUELLO_E = [
+  {id:"iso_cuello",n:"Isométricos de cuello, 4 direcciones",s:"3 rondas, 8 s cada una",t:8,
+   h:"Mano contra frente, cada lateral y nuca. La cabeza no se mueve."},
+  {id:"suboc",n:"Estiramiento suboccipital",s:"2×30 s",t:30,
+   h:"Barbilla al pecho, manos guiando suavemente la coronilla hacia abajo."},
+  {id:"trapecio",n:"Estiramiento trapecio superior",s:"30 s por lado",t:30},
+  {id:"elevador",n:"Estiramiento elevador de la escápula",s:"30 s por lado",t:30,
+   h:"Gira la cabeza hacia la axila del mismo lado, mira hacia abajo, y con esa mano presiona muy suave la nuca."},
+  {id:"tora_roller",n:"Movilidad torácica en foam roller",s:"2 min",t:120,
+   h:"Una dorsal rígida obliga al cuello a compensar. Cuenta doble."}
+];
 
-function renderNav(){
-  var n = document.getElementById("nav");
-  var h = "";
-  for(var i=0;i<TABS.length;i++){
-    h += '<button data-tab="' + TABS[i].id + '" class="' + (TABS[i].id===current?'on':'') + '">' + esc(TABS[i].label) + '</button>';
-  }
-  n.innerHTML = h;
+var PELV = {
+  1:{lbl:"Fase 1 · tumbado",ex:[{id:"pelv_sost",n:"Contracciones sostenidas",s:"3×10, mantener 3 s",t:3}]},
+  2:{lbl:"Fase 2 · sentado",ex:[
+    {id:"pelv_sost",n:"Contracciones sostenidas",s:"3×10, mantener 6 s",t:6},
+    {id:"pelv_rap",n:"Contracciones rápidas",s:"1×20"}]},
+  3:{lbl:"Fase 3 · de pie",ex:[
+    {id:"pelv_sost",n:"Contracciones sostenidas",s:"3×10, mantener 10 s",t:10},
+    {id:"pelv_rap",n:"Contracciones rápidas",s:"2×20"},
+    {id:"pelv_mov",n:"Contracción en movimiento",s:"×10",
+     h:"Al levantarte de la silla, al iniciar una repetición. Es la transferencia funcional."}]}
+};
+
+var MIO = {
+  1:{lbl:"Fase 1 · mes 1",ex:[
+    {n:"Abrir y cerrar la boca al máximo",s:"×10"},
+    {n:"Fruncir los labios y mantener",s:"×10, 10 s"},
+    {n:"Sonrisa exagerada y mantener",s:"×10"},
+    {n:"Cepillar la lengua por encima y por los lados",s:"×10"},
+    {n:"Punta de lengua al paladar y deslizar atrás",s:"×10"},
+    {n:"Sacar la lengua recta y mantener",s:"×10"},
+    {n:"Sacar y meter la lengua rápido",s:"×10"},
+    {n:"Lengua de comisura a comisura y círculo",s:"×10"},
+    {n:"Abrir y cerrar la boca rápido",s:"×10"},
+    {n:"Ma-ma-ma-ma y la-la-la-la",s:"×10"},
+    {n:"Masticar alternando lados y tragar",s:"×10"}
+  ]},
+  2:{lbl:"Fase 2 · mes 2",ex:[
+    {n:"Fruncir, mantener, sonreír, mantener",s:"×10"},
+    {n:"Apretar los labios fuertemente",s:"×10"},
+    {n:"Lengua buscando la barbilla",s:"×10"},
+    {n:"Ka-ka-ka-ka",s:"×10"},
+    {n:"Kala-kala-kala-kala",s:"×10"},
+    {n:"Elevación palatina con y sin bostezo",s:"×10"},
+    {n:"Vocal abierta intermitente",s:"×10"},
+    {n:"Vocal abierta sostenida",s:"×10"},
+    {n:"Succión con el buccinador",s:"×10"},
+    {n:"Empujar la mejilla contra el dedo",s:"×10"},
+    {n:"Movimientos laterales de mandíbula",s:"×10"},
+    {n:"Inspiración nasal forzada con vocal",s:"×10"}
+  ]},
+  3:{lbl:"Fase 3 · mes 3",ex:[
+    {n:"Inflar un globo, 5 veces seguidas",s:"×5"},
+    {n:"Elevación de mandíbula adelante y lados",s:"×10"},
+    {n:"Cantar las vocales A-E-I-O-U",s:"×10"},
+    {n:"Empujar una cuchara con la lengua",s:"×10"},
+    {n:"Succión de la lengua contra el paladar",s:"×10"},
+    {n:"Fruncir con la boca abierta",s:"×10"},
+    {n:"Ruido de sorber con los labios",s:"×10"}
+  ]}
+};
+
+var MOV_CAD=[
+  {id:"psoas",n:"Psoas en zancada",s:"2×60 s por lado",t:60,
+   h:"Mete el coxis hacia abajo antes de empujar la cadera adelante. Sin eso arqueas la lumbar en vez de estirar el psoas."},
+  {id:"nov",n:"90/90",s:"2×60 s por lado",t:60,
+   h:"Una pierna delante a 90 grados, la otra al lado a 90. Alterna rotando sin usar las manos."},
+  {id:"rana",n:"Rana",s:"2×90 s",t:90,
+   h:"Rodillas abiertas al máximo, tibias paralelas, cadera atrás. El ejercicio clave del spagat lateral."},
+  {id:"mariposa",n:"Mariposa con presión",s:"2×60 s",t:60}
+];
+var MOV_ISQ=[
+  {id:"pnf",n:"Isquios con banda, PNF contraer-relajar",s:"2 rondas × 4 ciclos por pierna",t:6,
+   h:"En el punto de tensión, empuja contra la banda al 25% durante 6 s, suelta y gana rango. Cuatro veces."},
+  {id:"good_morning",n:"Good morning con barra ligera",s:"3×10",w:1,
+   h:"Rango completo, poco peso. La fuerza en rango completo mejora la flexibilidad igual que el estiramiento."}
+];
+var MOV_ESP=[
+  {id:"catcow",n:"Cat-cow",s:"10 lentas"},
+  {id:"rot_tora",n:"Rotación torácica 90/90 de lado",s:"10 por lado"},
+  {id:"child",n:"Child's pose con alcance lateral",s:"60 s por lado",t:60}
+];
+var MOV_SPG=[
+  {id:"spg_front",n:"Spagat frontal sobre bloques",s:"90 s por lado",t:90,
+   h:"Anota la altura de los bloques cada mes. Ese es tu marcador de progreso real."},
+  {id:"spg_lat",n:"Spagat lateral sobre bloques",s:"90 s",t:90,
+   h:"Si notas tope duro en la ingle en vez de estiramiento muscular, es hueso. Ahí se para."}
+];
+
+var MESES=["enero","febrero","marzo","abril","mayo","junio","julio",
+           "agosto","septiembre","octubre","noviembre","diciembre"];
+function fechaLarga(){
+  var d=new Date();
+  return d.getDate()+" de "+MESES[d.getMonth()];
 }
 
-function render(){
-  renderNav();
-  for(var i=0;i<TABS.length;i++){
-    var el = document.getElementById("s-" + TABS[i].id);
-    if(!el) continue;
-    if(TABS[i].id === current){
-      el.innerHTML = TABS[i].fn();
-      el.className = "on";
-    }else{
-      el.className = "";
-      el.innerHTML = "";
+/* al abrir en un día nuevo, la plantilla vuelve al día que toca */
+function syncDay(){
+  var last=rd("lastOpen",null);
+  if(last!==today()){
+    wr("lastOpen",today());
+    selDay=todayIdx();
+    openBlk=null;
+  }
+}
+
+var DIAS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+var CORTO=["L","M","X","J","V","S","D"];
+
+/* ============================================================
+   3. CONSTRUCCIÓN DEL DÍA
+   ============================================================ */
+function buildDay(idx){
+  var c=cfg(), plan=c.plan[idx], B=[];
+  var pf=phaseOf("pelv"), mf=phaseOf("mio");
+
+  /* despertar */
+  var wake=[{id:"metrics",n:"Peso y energía al despertar",s:"toca para registrar",dom:"reg",metric:1,
+    h:"La energía matutina es tu síntoma principal. Es lo que más debería moverse con el protocolo de vía aérea."}];
+  if(pf) PELV[pf].ex.forEach(function(e,i){
+    wake.push({id:"pm_"+e.id,n:e.n,s:e.s,t:e.t,h:i===0?e.h:null,dom:"pelvi",pre:"Suelo pélvico"});
+  });
+  B.push({t:"Al despertar",m:"8 min",dom:"reg",items:wake,h0:6,h1:11});
+
+  /* media mañana */
+  if(mf) B.push({t:"Media mañana",m:"10 min",dom:"aire",h0:11,h1:14,
+    note:"Tanda 1 de 3. En hueco muerto: coche, ducha, cocinando.",
+    items:[{id:"mio1",n:"Miofuncional · tanda 1",s:MIO[mf].lbl,dom:"aire",mio:mf}]});
+
+  if(ENT[plan]){
+    var e=ENT[plan], esPierna=(plan==="lowerA"||plan==="lowerB");
+    /* calentamiento */
+    var wm=WARM[e.warm].map(function(x){ return {id:x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"movil"}; });
+    B.push({t:"Calentamiento",m:"8 min",dom:"movil",h0:16,h1:22,
+      note: esPierna
+        ? "No es opcional. Con la rodilla izquierda en observación, las series de aproximación son lo que evita el susto."
+        : "Manguito rotador y escápula antes de cualquier press. Con protrusiones C5-C7, entrar en frío es donde aparecen los problemas.",
+      items:wm});
+    /* activación cervical */
+    if(c.cuello) B.push({t:"Activación cervical",m:"4 min",dom:"aire",h0:16,h1:22,
+      note:"Activación, no estiramiento. Mejora la posición escapular en press y remo.",
+      items:CUELLO_A.map(function(x){ return {id:"ca_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"aire"}; })});
+    /* sesión */
+    B.push({t:e.t,m:e.mins+" min",dom:"fuerza",h0:16,h1:22,session:plan,
+      items:e.ex.map(function(x){
+        return {id:"ex_"+x.id,exId:x.id,n:x.n,s:x.s,h:x.h,w:x.w,r:x.r,sets:x.sets,tipo:x.tipo,t:x.t,dom:"fuerza"};
+      })});
+    /* después */
+    var post=[];
+    if(c.cuello) CUELLO_E.forEach(function(x){ post.push({id:"ce_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"aire"}); });
+    if(c.mov){
+      var set = esPierna ? MOV_ISQ.concat(MOV_CAD) : MOV_ESP.concat(MOV_CAD);
+      set.forEach(function(x){ post.push({id:"mp_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,w:x.w,dom:"movil"}); });
+    }
+    if(post.length) B.push({t:"Después de entrenar",m:(esPierna?"25 min":"20 min"),dom:"movil",h0:16,h1:23,
+      note: esPierna
+        ? "Músculo caliente: el mejor momento de la semana para ganar rango en isquios."
+        : "Nunca estires en estático antes de entrenar: reduce la producción de fuerza.",
+      items:post});
+  } else {
+    if(c.cuello) B.push({t:"Cuello, sesión completa",m:"10 min",dom:"aire",h0:9,h1:21,
+      note:"Sin fatiga previa la calidad del trabajo es mejor que en días de gimnasio.",
+      items:CUELLO_A.concat(CUELLO_E).map(function(x){
+        return {id:"cf_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"aire"}; })});
+    if(c.mov && plan==="off"){
+      var ms=MOV_CAD.concat(MOV_ISQ,MOV_ESP).map(function(x){
+        return {id:"md_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,w:x.w,dom:"movil"}; });
+      if(idx===5) MOV_SPG.forEach(function(x){
+        ms.push({id:"ms_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"movil"}); });
+      B.push({t:"Movilidad, sesión larga",m:(idx===5?"30 min":"20 min"),dom:"movil",h0:9,h1:21,
+        note: idx===5?"El sábado incluye el trabajo específico de spagat, su frecuencia es semanal.":"",
+        items:ms});
     }
   }
+
+  if(mf) B.push({t:"Tarde",m:"10 min",dom:"aire",h0:15,h1:20,
+    items:[{id:"mio2",n:"Miofuncional · tanda 2",s:MIO[mf].lbl,dom:"aire",mio:mf}]});
+
+  var night=[];
+  if(mf) night.push({id:"mio3",n:"Miofuncional · tanda 3",s:MIO[mf].lbl,dom:"aire",mio:mf});
+  if(pf) PELV[pf].ex.forEach(function(e2){
+    night.push({id:"pn_"+e2.id,n:e2.n,s:e2.s,t:e2.t,dom:"pelvi",pre:"Suelo pélvico"}); });
+  night.push({id:"lado",n:"Dormir de lado, no boca arriba",s:"lo más importante de la noche",dom:"aire",
+    h:"Con colapso faríngeo la postura supina empeora el cierre por gravedad. Pelota de tenis cosida en la espalda del pijama si te giras dormido."});
+  night.push({id:"cabecera",n:"Cabecera elevada 10-15 cm",s:"",dom:"aire"});
+  night.push({id:"pantallas",n:"Sin móvil antes de dormir",s:"música suave en su lugar",dom:"aire"});
+  night.push({id:"sintomas",n:"Registro de la noche",s:"toca para registrar",dom:"reg",night:1,
+    h:"Cefalea, ronquido y digestión. Es lo que llevarás a la neumóloga y al digestivo."});
+  B.push({t:"Noche",m:"12 min",dom:"aire",h0:21,h1:24,items:night});
+
+  return B;
 }
 
-function renderHeader(){
-  var days = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
-  var months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-  var d = new Date();
-  document.getElementById("today").textContent =
-    days[d.getDay()] + ", " + d.getDate() + " de " + months[d.getMonth()];
+/* ============================================================
+   4. ESTADO DE LA VISTA
+   ============================================================ */
+var view="hoy", selDay=todayIdx(), openBlk=null, layerEl=null;
+var sess=null, timerId=null, timerLeft=0, timerLabel="", undoSnap=null, toastId=null;
+
+/* La plantilla semanal es fija y se repite siempre. Las marcas, métricas
+   y registros se guardan SIEMPRE contra el día real de hoy, sea cual sea
+   la pestaña de la plantilla que estés mirando. Así puedes hacer la rutina
+   del martes un viernes y queda registrada en el día correcto. */
+function curDateKey(){ return today(); }
+function st(){ return dayState(curDateKey()); }
+function setSt(s){ setDayState(curDateKey(),s); }
+
+/* ============================================================
+   5. PROGRESIÓN DE CARGA
+   ============================================================ */
+function lastEntry(exId){ var l=exLog(exId); return l.length?l[l.length-1]:null; }
+function suggest(exId,tipo){
+  var e=lastEntry(exId);
+  if(!e||!e.kg) return null;
+  var kg=parseFloat(String(e.kg).replace(",","."));
+  if(isNaN(kg)) return null;
+  var step = tipo==="comp" ? 2.5 : 1;
+  if(e.rpe==null) return {kg:kg,txt:"repite "+fmt(kg)+" kg y anota el RPE"};
+  if(e.rpe<=7) return {kg:kg+step,txt:"sube a "+fmt(kg+step)+" kg"};
+  if(e.rpe<=8.5) return {kg:kg,txt:"mantén "+fmt(kg)+" kg y busca una repetición más"};
+  return {kg:kg,txt:"repite "+fmt(kg)+" kg, el último fue muy exigente"};
+}
+function fmt(n){ return (Math.round(n*10)/10).toString().replace(".",","); }
+
+/* ============================================================
+   6. RENDER — comunes
+   ============================================================ */
+function ringHTML(done,tot){
+  var pct=tot?done/tot:0, r=23, cir=2*Math.PI*r;
+  return '<svg width="54" height="54" viewBox="0 0 54 54">'+
+    '<circle cx="27" cy="27" r="'+r+'" fill="none" stroke="var(--card)" stroke-width="5"/>'+
+    '<circle cx="27" cy="27" r="'+r+'" fill="none" stroke="var(--fuerza)" stroke-width="5"'+
+    ' stroke-linecap="round" stroke-dasharray="'+cir.toFixed(1)+'"'+
+    ' stroke-dashoffset="'+(cir*(1-pct)).toFixed(1)+'"/></svg>'+
+    '<div class="n">'+done+'/'+tot+'</div>';
+}
+function countDay(B){
+  var s=st(),t=0,d=0;
+  B.forEach(function(b){ b.items.forEach(function(i){ t++; if(s[i.id]) d++; }); });
+  return {t:t,d:d};
+}
+function itemHTML(it){
+  var s=st(), ok=!!s[it.id];
+  var col = DOM[it.dom||"fuerza"].c;
+  var h='<div class="it'+(ok?' ok':'')+'">';
+  h+='<div class="tx">';
+  h+='<div class="nm">'+(it.pre?'<span style="color:'+col+'">'+esc(it.pre)+' · </span>':'')+esc(it.n)+'</div>';
+  if(it.s) h+='<div class="sch" style="color:'+col+'">'+esc(it.s)+'</div>';
+
+  if(it.metric){
+    var m=metrics()[curDateKey()]||{};
+    var parts=[];
+    if(m.peso!=null) parts.push(m.peso+" kg");
+    if(m.energia!=null) parts.push("energía "+m.energia+"/10");
+    if(parts.length) h+='<div class="meta">'+esc(parts.join(" · "))+'</div>';
+  }
+  if(it.night){
+    var m2=metrics()[curDateKey()]||{};
+    var p2=[];
+    if(m2.cefalea!=null) p2.push("cefalea "+m2.cefalea+"/10");
+    if(m2.ronquido!=null) p2.push("ronquido "+m2.ronquido+"/10");
+    if(m2.digest!=null) p2.push("digestión "+m2.digest+"/10");
+    if(p2.length) h+='<div class="meta">'+esc(p2.join(" · "))+'</div>';
+  }
+  if(it.w){
+    var le=lastEntry(it.exId||it.id);
+    if(le) h+='<div class="meta">Última vez: <b style="color:var(--tx)">'+esc(le.kg)+' kg</b>'+
+      (le.rpe!=null?' · RPE '+le.rpe:'')+'</div>';
+  }
+  if(it.h) h+='<div class="hint">'+esc(it.h)+'</div>';
+  h+='</div>';
+  h+='<button class="chk" aria-pressed="'+(ok?'true':'false')+'" data-chk="'+esc(it.id)+'"'+
+     ' aria-label="'+esc(it.n)+'"></button>';
+  h+='</div>';
+  return h;
 }
 
-/* ---------- eventos ---------- */
-document.addEventListener("click", function(ev){
-  var t = ev.target;
-  if(!t || !t.getAttribute) return;
+/* ============================================================
+   7. VISTA HOY
+   ============================================================ */
+function nowHour(){ return new Date().getHours(); }
 
-  var tab = t.getAttribute("data-tab");
-  if(tab){ current = tab; render(); window.scrollTo(0,0); return; }
+function viewHoy(){
+  var B=buildDay(selDay), c=countDay(B), cf=cfg();
+  var isToday = selDay===todayIdx();
 
-  var tr = t.getAttribute("data-train");
-  if(tr){ trainSel = tr; render(); return; }
+  if(openBlk===null){
+    openBlk=0;
+    if(isToday){
+      var hh=nowHour();
+      for(var i=0;i<B.length;i++){
+        if(B[i].h0!=null && hh>=B[i].h0 && hh<B[i].h1){ openBlk=i; break; }
+      }
+    }
+  }
 
-  var mi = t.getAttribute("data-mio");
-  if(mi){ mioSel = parseInt(mi,10); render(); return; }
+  var h="";
 
-  var pv = t.getAttribute("data-pelv");
-  if(pv){ pelvSel = parseInt(pv,10); render(); return; }
+  if(!isToday){
+    h+='<div class="note"><b>Estás viendo la rutina de '+esc(DIAS[selDay].toLowerCase())+'.</b> '+
+       'Lo que marques se guarda en el día de hoy, así que puedes hacer esta sesión aunque te hayas '+
+       'saltado el orden de la semana.</div>';
+  }
 
-  var c = t.getAttribute("data-c");
-  if(c){
-    var st = getState();
-    st[c] = !st[c];
-    setState(st);
-    render();
+  /* registro rápido */
+  var m=metrics()[curDateKey()]||{};
+  h+='<div class="quick">';
+  h+='<button class="qcard" data-open="peso"><div class="ql">Peso</div>'+
+     (m.peso!=null?'<div class="qv">'+esc(m.peso)+'</div><div class="qu">kg</div>'
+                  :'<div class="qv empty">—</div><div class="qu">anotar</div>')+'</button>';
+  h+='<button class="qcard" data-open="energia"><div class="ql">Energía</div>'+
+     (m.energia!=null?'<div class="qv">'+esc(m.energia)+'</div><div class="qu">de 10</div>'
+                     :'<div class="qv empty">—</div><div class="qu">anotar</div>')+'</button>';
+  h+='<button class="qcard" data-open="noche"><div class="ql">Noche</div>'+
+     (m.ronquido!=null||m.cefalea!=null
+        ?'<div class="qv">✓</div><div class="qu">registrada</div>'
+        :'<div class="qv empty">—</div><div class="qu">anotar</div>')+'</button>';
+  h+='</div>';
+
+  if(c.t && c.d===c.t){
+    h+='<div class="done-all"><div class="t">Día completo</div>'+
+       '<div class="s">La constancia es lo que decide el resultado, no la intensidad de un día suelto.</div></div>';
+  }
+
+  /* botón de sesión */
+  for(var k=0;k<B.length;k++){
+    if(B[k].session){
+      var sdone=B[k].items.filter(function(x){ return st()[x.id]; }).length;
+      h+='<button class="cta f" data-sess="'+esc(B[k].session)+'">'+
+         (sdone?'Continuar sesión · '+sdone+'/'+B[k].items.length:'Empezar sesión de gimnasio')+'</button>';
+      break;
+    }
+  }
+
+  /* bloques */
+  for(var b=0;b<B.length;b++){
+    var blk=B[b], open=(b===openBlk);
+    var bd=blk.items.filter(function(x){ return st()[x.id]; }).length;
+    var full=bd===blk.items.length;
+    h+='<div class="blk'+(open&&isToday?' now':'')+'">';
+    h+='<button class="bh" aria-expanded="'+(open?'true':'false')+'" data-blk="'+b+'">';
+    h+='<span class="dot" style="background:'+DOM[blk.dom].c+'"></span>';
+    h+='<span class="bt"><span class="bn">'+esc(blk.t)+'</span>'+
+       '<span class="bm">'+esc(blk.m)+' · '+esc(DOM[blk.dom].n)+'</span></span>';
+    h+='<span class="bc" style="'+(full?'color:var(--movil)':'')+'">'+bd+'/'+blk.items.length+'</span>';
+    h+='<span class="ar">›</span></button>';
+    if(open){
+      h+='<div class="bb">';
+      if(blk.note) h+='<div class="bnote">'+esc(blk.note)+'</div>';
+      blk.items.forEach(function(it){ h+=itemHTML(it); });
+      h+='</div>';
+    }
+    h+='</div>';
+  }
+
+  h+='<button class="ghost" data-open="pain">Registrar una molestia</button>';
+  h+='<button class="ghost" data-reset="1">Reiniciar este día</button>';
+  return h;
+}
+
+/* ============================================================
+   8. VISTA PROGRESO
+   ============================================================ */
+function seriesOf(field,days){
+  var m=metrics(), out=[];
+  for(var i=days-1;i>=0;i--){
+    var d=new Date(); d.setDate(d.getDate()-i);
+    var k=iso(d);
+    out.push({d:k, v:(m[k]&&m[k][field]!=null)?parseFloat(m[k][field]):null});
+  }
+  return out;
+}
+function lineChart(data,color,unit){
+  var pts=data.filter(function(p){ return p.v!=null; });
+  if(pts.length<2) return '<div class="empty">Necesitas al menos dos registros para ver la tendencia.</div>';
+  var W=300,H=90,P=6;
+  var vs=pts.map(function(p){ return p.v; });
+  var mn=Math.min.apply(null,vs), mx=Math.max.apply(null,vs);
+  if(mx-mn<0.001){ mx=mn+1; mn=mn-1; }
+  var n=data.length;
+  function X(i){ return P+(i/(n-1))*(W-2*P); }
+  function Y(v){ return H-P-((v-mn)/(mx-mn))*(H-2*P); }
+  var d="",started=false,circles="";
+  data.forEach(function(p,i){
+    if(p.v==null) return;
+    d += (started?" L":"M")+X(i).toFixed(1)+" "+Y(p.v).toFixed(1);
+    started=true;
+  });
+  var last=null;
+  for(var j=data.length-1;j>=0;j--){ if(data[j].v!=null){ last={i:j,v:data[j].v}; break; } }
+  if(last) circles='<circle cx="'+X(last.i).toFixed(1)+'" cy="'+Y(last.v).toFixed(1)+
+    '" r="3.5" fill="'+color+'"/>';
+  var first=vs[0], lastv=vs[vs.length-1], diff=lastv-first;
+  var sign=diff>0?"+":"";
+  return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="height:90px">'+
+    '<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'+
+    circles+'</svg>'+
+    '<div class="cs" style="margin-top:8px">'+pts.length+' registros · '+
+    esc(fmt(mn))+' a '+esc(fmt(mx))+' '+esc(unit)+' · variación '+esc(sign+fmt(diff))+' '+esc(unit)+'</div>';
+}
+function viewProgreso(){
+  var h='<h2>Progreso</h2><div class="lead">Lo que el protocolo mueve de verdad, con el tiempo</div>';
+
+  /* consistencia */
+  var done30=0, grid="";
+  for(var i=29;i>=0;i--){
+    var d=new Date(); d.setDate(d.getDate()-i);
+    var k=iso(d), s=dayState(k);
+    var n=0; for(var kk in s){ if(s[kk]===true) n++; }
+    var lvl = n===0?0:(n<5?1:(n<12?2:3));
+    if(n>=5) done30++;
+    var op=[0,.22,.55,1][lvl];
+    grid+='<div style="background:rgba(95,201,141,'+op+');border-color:'+(lvl?'transparent':'var(--line)')+'"></div>';
+  }
+  var streak=0;
+  for(var j=0;j<120;j++){
+    var dd=new Date(); dd.setDate(dd.getDate()-j);
+    var ss=dayState(iso(dd)); var c2=0;
+    for(var q in ss){ if(ss[q]===true) c2++; }
+    if(c2>=5) streak++;
+    else if(j>0) break;
+  }
+
+  h+='<div class="stats">';
+  h+='<div class="stat"><div class="sv">'+done30+'</div><div class="sl">días de 30</div></div>';
+  h+='<div class="stat"><div class="sv">'+streak+'</div><div class="sl">racha actual</div></div>';
+  h+='<div class="stat"><div class="sv">'+Math.round(done30/30*100)+'%</div><div class="sl">constancia</div></div>';
+  h+='</div>';
+
+  h+='<div class="chart"><h4>Últimos 30 días</h4>'+
+     '<div class="cs">Cuenta un día cumplido con 5 ítems o más. Fallar uno no rompe nada.</div>'+
+     '<div class="grid30">'+grid+'</div></div>';
+
+  h+='<div class="chart"><h4>Peso corporal</h4><div class="cs">Objetivo lean bulk hacia 80 kg</div>'+
+     lineChart(seriesOf("peso",60),"var(--fuerza)","kg")+'</div>';
+
+  h+='<div class="chart"><h4>Energía al despertar</h4>'+
+     '<div class="cs">Tu síntoma principal. Es el marcador que más debería moverse</div>'+
+     lineChart(seriesOf("energia",60),"var(--movil)","")+'</div>';
+
+  h+='<div class="chart"><h4>Ronquido</h4><div class="cs">Valoración subjetiva o de tercera persona</div>'+
+     lineChart(seriesOf("ronquido",60),"var(--aire)","")+'</div>';
+
+  h+='<div class="chart"><h4>Cefalea</h4><div class="cs">Intensidad diaria, para correlacionar con sueño y estrés</div>'+
+     lineChart(seriesOf("cefalea",60),"var(--pelvi)","")+'</div>';
+
+  /* cargas */
+  h+='<h3>Cargas de referencia</h3>';
+  var keyEx=[["sentadilla","Sentadilla"],["pm_convencional","Peso muerto"],
+             ["pm_rumano","Peso muerto rumano"],["press_banca","Press banca"],
+             ["press_mil_manc","Press militar mancuernas"],["dominadas","Dominadas o jalón"]];
+  var any=false, tbl='<div class="chart">';
+  keyEx.forEach(function(p){
+    var l=exLog(p[0]);
+    if(!l.length) return;
+    any=true;
+    var lastL=l[l.length-1], firstL=l[0];
+    var a=parseFloat(String(firstL.kg).replace(",",".")),
+        b2=parseFloat(String(lastL.kg).replace(",","."));
+    var dd2=(!isNaN(a)&&!isNaN(b2))?(b2-a):null;
+    tbl+='<div style="display:flex;justify-content:space-between;align-items:baseline;'+
+         'padding:9px 0;border-bottom:1px solid var(--line)">'+
+         '<span style="font-size:14px">'+esc(p[1])+'</span>'+
+         '<span style="font-size:15px;font-weight:800">'+esc(lastL.kg)+' kg'+
+         (dd2!==null&&dd2!==0?' <span style="color:var(--movil);font-size:12px">'+
+          (dd2>0?"+":"")+esc(fmt(dd2))+'</span>':'')+'</span></div>';
+  });
+  tbl+='</div>';
+  h+= any?tbl:'<div class="chart"><div class="empty">Registra pesos en el modo sesión y aparecerán aquí.</div></div>';
+
+  /* molestias */
+  var pl=painLog().slice(-6).reverse();
+  if(pl.length){
+    h+='<h3>Molestias registradas</h3><div class="chart">';
+    pl.forEach(function(p){
+      h+='<div style="padding:9px 0;border-bottom:1px solid var(--line);font-size:13px">'+
+         '<b style="color:var(--tx)">'+esc(p.zona)+'</b> · '+esc(p.int)+'/10 · '+esc(p.d)+
+         (p.ex?'<div style="color:var(--dim2);font-size:12px;margin-top:2px">'+esc(p.ex)+'</div>':'')+
+         (p.nota?'<div style="color:var(--dim2);font-size:12px;margin-top:2px">'+esc(p.nota)+'</div>':'')+
+         '</div>';
+    });
+    h+='</div>';
+  }
+
+  h+='<button class="cta g" data-open="export">Generar resumen para consulta</button>';
+  return h;
+}
+
+/* ============================================================
+   9. VISTA AJUSTES
+   ============================================================ */
+function viewAjustes(){
+  var c=cfg();
+  var h='<h2>Ajustes</h2><div class="lead">Qué tienes activo y en qué fase</div>';
+
+  h+='<div class="note"><b>No arranques todo a la vez.</b> Orden: cuello ya activo, luego suelo pélvico, miofuncional al terminar el antibiótico del H. pylori, y movilidad al volver al gimnasio con normalidad. Cinco protocolos el mismo día se abandonan en dos semanas.</div>';
+
+  h+='<div class="cfgrow"><div class="ct">Cuello y postura</div>'+
+     '<div class="cd">Rectificación cervical y cefalea tensional. Activación antes de entrenar, estiramientos después.</div>'+
+     '<div class="seg"><button data-c="cuello" data-v="0" class="'+(c.cuello===0?'on':'')+'">Off</button>'+
+     '<button data-c="cuello" data-v="1" class="'+(c.cuello===1?'on':'')+'">On</button></div></div>';
+
+  var pf=phaseOf("pelv");
+  h+='<div class="cfgrow"><div class="ct">Suelo pélvico</div>'+
+     '<div class="cd">12 semanas. '+(c.autoPhase&&c.pelvStart?('Fase actual: '+pf+', calculada desde el '+esc(c.pelvStart)+'.'):'Fase manual.')+'</div>'+
+     '<div class="seg"><button data-c="pelv" data-v="0" class="'+(c.pelv===0?'on':'')+'">Off</button>';
+  for(var p=1;p<=3;p++) h+='<button data-c="pelv" data-v="'+p+'" class="'+(c.pelv===p?'on':'')+'">F'+p+'</button>';
+  h+='</div></div>';
+
+  var mf=phaseOf("mio");
+  h+='<div class="cfgrow"><div class="ct">Terapia miofuncional</div>'+
+     '<div class="cd">3 meses. La fase 3 concentra el 40-45% de la mejoría del ronquido: llegar hasta ahí es lo que decide el resultado. '+
+     (c.autoPhase&&c.mioStart?('Fase actual: '+mf+', desde el '+esc(c.mioStart)+'.'):'Fase manual.')+'</div>'+
+     '<div class="seg"><button data-c="mio" data-v="0" class="'+(c.mio===0?'on':'')+'">Off</button>';
+  for(var mm=1;mm<=3;mm++) h+='<button data-c="mio" data-v="'+mm+'" class="'+(c.mio===mm?'on':'')+'">F'+mm+'</button>';
+  h+='</div></div>';
+
+  h+='<div class="cfgrow"><div class="ct">Movilidad</div>'+
+     '<div class="cd">Cadera, isquios y espalda. Siempre después de entrenar, nunca antes.</div>'+
+     '<div class="seg"><button data-c="mov" data-v="0" class="'+(c.mov===0?'on':'')+'">Off</button>'+
+     '<button data-c="mov" data-v="1" class="'+(c.mov===1?'on':'')+'">On</button></div></div>';
+
+  h+='<div class="cfgrow"><div class="ct">Avance automático de fase</div>'+
+     '<div class="cd">Calcula la fase desde la fecha en que activaste cada protocolo, para que no tengas que acordarte.</div>'+
+     '<div class="seg"><button data-c="autoPhase" data-v="0" class="'+(c.autoPhase===0?'on':'')+'">Manual</button>'+
+     '<button data-c="autoPhase" data-v="1" class="'+(c.autoPhase===1?'on':'')+'">Automático</button></div></div>';
+
+  h+='<h3>Días de entrenamiento</h3>';
+  h+='<div class="note">Cinco días alternando Upper y Lower, con el fin de semana libre para recuperar del todo. Si una semana no te cuadra, muévelo aquí, pero no pongas dos Upper seguidos: comparten hombro y brazos.</div>';
+  for(var d=0;d<7;d++){
+    h+='<div class="cfgrow"><div class="ct">'+DIAS[d]+'</div><div class="seg">';
+    [["upperA","Up A"],["lowerA","Low A"],["upperB","Up B"],["lowerB","Low B"],["upperC","Up C"],["off","Movil."],["libre","Libre"]]
+      .forEach(function(o){
+        h+='<button data-plan="'+d+'" data-pv="'+o[0]+'" class="'+(c.plan[d]===o[0]?'on':'')+'"'+
+           ' style="font-size:11px;padding:10px 2px">'+o[1]+'</button>';
+      });
+    h+='</div></div>';
+  }
+
+  h+='<h3>Datos</h3>';
+  h+='<div class="note warn"><b>Todo vive en este navegador.</b> Si limpias datos o cambias de móvil, se pierde. Exporta de vez en cuando y guárdate el texto.</div>';
+  h+='<button class="ghost" data-open="backup">Exportar copia de seguridad</button>';
+  h+='<button class="ghost" data-open="import">Restaurar copia</button>';
+
+  return h;
+}
+
+/* ============================================================
+   10. VISTA GUÍA
+   ============================================================ */
+function viewGuia(){
+  var c=cfg(), mf=phaseOf("mio");
+  var h='<h2>Guía</h2><div class="lead">Reglas, avisos y seguimiento clínico</div>';
+
+  h+='<h3>Las reglas que no se saltan</h3><ul>';
+  h+='<li><b>Estiramiento estático antes de fuerza: nunca.</b> Reduce la producción de fuerza de forma aguda. Movilidad siempre después.</li>';
+  h+='<li><b>Suelo pélvico fuerte y día de piernas: separados.</b> Sentadilla y peso muerto ya lo cargan. La tanda intensa va por la noche.</li>';
+  h+='<li><b>Cuello antes de Upper: sí.</b> Chin tucks y retracción escapular son activación, no estiramiento.</li>';
+  h+='<li><b>Upper y Lower alternos.</b> La división de cinco días ya deja 48 h entre grupos: Upper A lunes, Upper B miércoles, Upper C viernes.</li>';
+  h+='</ul>';
+
+  h+='<div class="note bad"><b>Protrusiones C5-C7.</b> Nada de flexión cervical forzada bajo carga, ni rotaciones bruscas, ni círculos completos de cuello. Si algo genera hormigueo o dolor que baja al brazo, paras y lo registras.</div>';
+  h+='<div class="note bad"><b>Suelo pélvico, nunca durante la micción.</b> Cortar el chorro sirve para identificar el músculo la primera vez, no como entrenamiento: repetirlo deja vaciado incompleto y altera la coordinación vejiga-esfínter. Y la relajación importa tanto como la contracción: si notas molestia perineal o urgencia urinaria, para una semana.</div>';
+  h+='<div class="note warn"><b>Rodilla izquierda.</b> Molestia rotuliana que apareció a 120 kg y persistía a 90 kg. Sin revisar. Sentadilla profunda cargada en observación: registra cualquier molestia para tener el histórico.</div>';
+
+  if(mf){
+    h+='<h3>Miofuncional · '+esc(MIO[mf].lbl)+'</h3>';
+    h+='<div class="note">Cada ejercicio 10 repeticiones. El conjunto, 3 veces al día, unos 10 minutos por tanda.<ul>';
+    MIO[mf].ex.forEach(function(e){ h+='<li>'+esc(e.n)+' — '+esc(e.s)+'</li>'; });
+    h+='</ul></div>';
+  }
+
+  h+='<h3>Qué esperar y cuándo</h3><ul>';
+  h+='<li><b>Suelo pélvico.</b> 4-6 semanas: mejor control eyaculatorio. 8-12 semanas: erecciones más firmes. 3-6 meses: máximo.</li>';
+  h+='<li><b>Miofuncional.</b> Fase 1: 10-15% de mejoría percibida. Fase 2: 15-20%. Fase 3: 40-45%. Casi todo el beneficio está al final.</li>';
+  h+='<li><b>Movilidad.</b> La dosis óptima son unos 10 minutos por grupo muscular y semana. Acumular volumen, no sesiones épicas.</li>';
+  h+='<li><b>Cuello.</b> Evidencia sólida para dolor y postura funcional; débil para revertir la rectificación en radiografía. Objetivo realista: menos cefalea.</li>';
+  h+='</ul>';
+
+  h+='<h3>Seguimientos médicos abiertos</h3><ul>';
+  h+='<li>Test de aliento de control del H. pylori, 4 semanas tras la última dosis del antibiótico.</li>';
+  h+='<li>Polisomnografía completa en laboratorio. La poligrafía domiciliaria negativa no descarta apnea leve ni resistencia de vía aérea superior.</li>';
+  h+='<li>Control evolutivo de la parotiditis izquierda.</li>';
+  h+='<li>Repetir transaminasas sin entrenar los 2-3 días previos a la extracción.</li>';
+  h+='<li>Rodilla izquierda, si la molestia persiste.</li>';
+  h+='</ul>';
+
+  h+='<h3>Suplementos durante la erradicación</h3><ul>';
+  h+='<li><b>Yovis</b> en ayunas, separado 2-3 h de cada toma de antibiótico.</li>';
+  h+='<li><b>Gelsectan</b> con desayuno y cena.</li>';
+  h+='<li><b>Vitamina D</b> con el desayuno, una sola fuente: Hidroferol mensual o bote diario, no ambos.</li>';
+  h+='<li><b>Magnesio</b> una hora antes de dormir.</li>';
+  h+='<li><b>Fuera por ahora:</b> Rhodiola y Mariendistel. El cardo mariano enmascararía la analítica de control de transaminasas.</li>';
+  h+='</ul>';
+
+  h+='<h3>Medidas de entorno</h3><ul>';
+  h+='<li>Dormir de lado. Pelota de tenis cosida en la espalda del pijama si te giras.</li>';
+  h+='<li>Cabecera elevada 10-15 cm.</li>';
+  h+='<li>Fundas antiácaros en colchón y almohada, sábanas a 60 grados. Tienes IgE específica positiva a ambos dermatofagoides.</li>';
+  h+='<li>Alcohol cero las noches importantes: relaja la musculatura faríngea.</li>';
+  h+='<li>Respiración nasal consciente de día, boca cerrada y lengua en el paladar.</li>';
+  h+='</ul>';
+
+  return h;
+}
+
+/* ============================================================
+   11. MODO SESIÓN
+   ============================================================ */
+function openSession(plan){
+  sess={plan:plan,i:0};
+  renderAll();
+}
+function sessionHTML(){
+  var e=ENT[sess.plan], ex=e.ex[sess.i];
+  var s=st();
+  var setsDone = s["sets_"+ex.id]||0;
+  var pct=((sess.i)/e.ex.length)*100;
+  var lg=lastEntry(ex.id), sg=ex.w?suggest(ex.id,ex.tipo):null;
+
+  var h='<div class="sess">';
+  h+='<div class="sbar"><button class="x" data-sclose="1" aria-label="Cerrar">×</button>'+
+     '<div class="sprog"><div style="width:'+pct.toFixed(0)+'%"></div></div>'+
+     '<span class="sc">'+(sess.i+1)+' / '+e.ex.length+'</span></div>';
+
+  h+='<div class="sbody">';
+  h+='<div class="sex">'+esc(ex.n)+'</div>';
+  h+='<div class="ssch" style="color:var(--fuerza)">'+esc(ex.s)+'</div>';
+
+  if(ex.h) h+='<div class="slast" style="border-color:var(--bad)">'+esc(ex.h)+'</div>';
+
+  if(ex.w){
+    h+='<div class="slast">';
+    if(lg){
+      h+='Última vez: <b>'+esc(lg.kg)+' kg</b>'+(lg.rpe!=null?' con RPE '+lg.rpe:'')+
+         ' el '+esc(lg.d)+'.';
+      if(sg) h+='<br><span class="sug">Hoy: '+esc(sg.txt)+'</span>';
+    } else {
+      h+='Sin registro previo.'+(ex.r?' Referencia: <b>'+esc(ex.r)+'</b>.':'')+
+         '<br><span class="sug">Anota el peso y el RPE para que la próxima vez te proponga carga.</span>';
+    }
+    h+='</div>';
+
+    h+='<div class="fld" style="margin-top:18px"><label>Peso de trabajo</label>'+
+       '<input type="text" inputmode="decimal" id="sw" placeholder="kg" value="'+
+       esc(s["w_ex_"+ex.id]||(sg?fmt(sg.kg):""))+'"></div>';
+
+    h+='<div class="fld"><label>RPE · esfuerzo percibido</label><div class="row" id="srpe">';
+    [6,7,8,9,10].forEach(function(v){
+      h+='<button data-rpe="'+v+'" class="'+(String(s["rpe_"+ex.id])===String(v)?'on':'')+'">'+v+'</button>';
+    });
+    h+='</div></div>';
+  }
+
+  h+='<div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;'+
+     'color:var(--dim2);font-weight:700;margin-top:6px">Series completadas</div>';
+  h+='<div class="sets">';
+  for(var k=1;k<=(ex.sets||1);k++){
+    h+='<button data-set="'+k+'" class="'+(k<=setsDone?'on':'')+'">'+k+'</button>';
+  }
+  h+='</div>';
+  h+='<div style="font-size:12px;color:var(--dim2)">Al marcar una serie arranca el descanso: '+
+     (ex.tipo==="comp"?"120 s en compuestos":"60 s en aislamiento")+'.</div>';
+
+  h+='<button class="ghost" data-open="pain" data-painex="'+esc(ex.n)+'">Registrar molestia en este ejercicio</button>';
+  h+='</div>';
+
+  h+='<div class="sfoot">';
+  h+='<button class="prev" data-snav="-1" aria-label="Anterior">‹</button>';
+  h+='<button class="next" data-snav="1">'+(sess.i===e.ex.length-1?"Terminar sesión":"Siguiente ejercicio")+'</button>';
+  h+='</div></div>';
+
+  if(timerId) h+=timerHTML();
+  return h;
+}
+function timerHTML(){
+  var mm=Math.floor(timerLeft/60), ss2=timerLeft%60;
+  return '<div class="timer"><span class="tv">'+mm+':'+pad(ss2)+'</span>'+
+    '<span class="tl">'+esc(timerLabel)+'</span>'+
+    '<button data-timer="add">+30 s</button>'+
+    '<button data-timer="stop">Saltar</button></div>';
+}
+function startTimer(sec,label){
+  stopTimer();
+  timerLeft=sec; timerLabel=label||"Descanso";
+  timerId=setInterval(function(){
+    timerLeft--;
+    if(timerLeft<=0){
+      stopTimer();
+      if(navigator.vibrate) try{ navigator.vibrate([200,100,200]); }catch(e){}
+      renderAll();
+      return;
+    }
+    var el=document.querySelector(".timer .tv");
+    if(el){ el.textContent=Math.floor(timerLeft/60)+":"+pad(timerLeft%60); }
+    else renderAll();
+  },1000);
+  renderAll();
+}
+function stopTimer(){ if(timerId){ clearInterval(timerId); timerId=null; } }
+
+/* ============================================================
+   12. MODALES
+   ============================================================ */
+function modal(inner){ return '<div class="ov" data-ovclose="1"><div class="sheet">'+inner+'</div></div>'; }
+
+function modalPeso(){
+  var m=metrics()[curDateKey()]||{};
+  return modal('<h3>Peso en ayunas</h3>'+
+    '<div class="sd">Siempre en las mismas condiciones: al despertar, antes de desayunar, después de orinar.</div>'+
+    '<div class="fld"><label>Kilos</label>'+
+    '<input type="text" inputmode="decimal" id="mv" placeholder="74,4" value="'+esc(m.peso!=null?m.peso:"")+'"></div>'+
+    '<button class="cta f" data-save="peso">Guardar</button>');
+}
+function modalEnergia(){
+  var m=metrics()[curDateKey()]||{};
+  var h='<h3>Energía al despertar</h3>'+
+    '<div class="sd">Del 1 al 10. Es tu síntoma principal y el marcador que más debería moverse con el protocolo de vía aérea.</div>'+
+    '<div class="row" id="scale">';
+  for(var i=1;i<=10;i++) h+='<button data-sc="energia" data-v="'+i+'" class="'+
+    (String(m.energia)===String(i)?'on':'')+'">'+i+'</button>';
+  h+='</div>';
+  return modal(h);
+}
+function modalNoche(){
+  var m=metrics()[curDateKey()]||{};
+  function scale(field,label,sub){
+    var h='<div class="fld"><label>'+esc(label)+'</label>'+
+      '<div class="sd" style="margin:-4px 0 8px;font-size:12px">'+esc(sub)+'</div><div class="row">';
+    for(var i=0;i<=10;i++) h+='<button data-sc="'+field+'" data-v="'+i+'" class="'+
+      (String(m[field])===String(i)?'on':'')+'" style="min-width:38px;padding:11px 4px;font-size:14px">'+i+'</button>';
+    return h+'</div></div>';
+  }
+  return modal('<h3>Registro de la noche</h3>'+
+    '<div class="sd">Treinta segundos. Es lo que convierte tu relato en datos para la consulta.</div>'+
+    scale("cefalea","Cefalea","0 ninguna, 10 la peor que recuerdas")+
+    scale("ronquido","Ronquido","0 nada, 10 fuerte. Si alguien te lo confirma, mejor")+
+    scale("digest","Molestia digestiva","0 ninguna, 10 mucha. Útil durante la erradicación")+
+    '<button class="ghost" data-mclose="1">Cerrar</button>');
+}
+function modalPain(exName){
+  var h='<h3>Registrar molestia</h3>'+
+    '<div class="sd">Tener el histórico es lo que convierte "me molestó alguna vez" en información útil para el fisio.</div>';
+  if(exName) h+='<div class="note" style="margin-top:0">Ejercicio: <b>'+esc(exName)+'</b></div>';
+  h+='<div class="fld"><label>Zona</label><select id="pz">'+
+     ['Rodilla izquierda','Rodilla derecha','Cervical','Lumbar','Hombro izquierdo','Hombro derecho','Cadera','Otra']
+       .map(function(z){ return '<option>'+z+'</option>'; }).join("")+'</select></div>';
+  h+='<div class="fld"><label>Intensidad</label><div class="row" id="pi">';
+  for(var i=1;i<=10;i++) h+='<button data-pint="'+i+'" style="min-width:38px;padding:11px 4px;font-size:14px">'+i+'</button>';
+  h+='</div></div>';
+  h+='<div class="fld"><label>Nota</label><textarea id="pn" placeholder="Apareció al bajar, cedió al reducir carga…"></textarea></div>';
+  h+='<button class="cta f" data-savepain="'+esc(exName||"")+'">Guardar</button>';
+  return modal(h);
+}
+function modalExport(){
+  var txt=buildExport();
+  return modal('<h3>Resumen para consulta</h3>'+
+    '<div class="sd">Copia este texto y llévalo a la cita. Datos objetivos pesan más que el relato.</div>'+
+    '<div class="fld"><textarea id="ex" style="min-height:300px;font-size:12.5px" readonly>'+esc(txt)+'</textarea></div>'+
+    '<button class="cta f" data-copy="ex">Copiar al portapapeles</button>'+
+    '<button class="ghost" data-mclose="1">Cerrar</button>');
+}
+function buildExport(){
+  var m=metrics(), L=[];
+  L.push("SEGUIMIENTO — Daniel Fernández Aguilar");
+  L.push("Generado el "+today());
+  L.push("");
+  var ks=Object.keys(m).sort();
+  var last30=ks.filter(function(k){ return daysBetween(k,today())<=30; });
+
+  function stat(field){
+    var vs=last30.map(function(k){ return m[k][field]; })
+                 .filter(function(v){ return v!=null; }).map(parseFloat);
+    if(!vs.length) return null;
+    var sum=vs.reduce(function(a,b){ return a+b; },0);
+    return {n:vs.length, avg:sum/vs.length, min:Math.min.apply(null,vs), max:Math.max.apply(null,vs),
+            first:vs[0], last:vs[vs.length-1]};
+  }
+  [["energia","Energía al despertar (1-10)"],["cefalea","Cefalea (0-10)"],
+   ["ronquido","Ronquido (0-10)"],["digest","Molestia digestiva (0-10)"],
+   ["peso","Peso corporal (kg)"]].forEach(function(p){
+    var s2=stat(p[0]);
+    if(!s2) return;
+    L.push(p[1]+": media "+fmt(s2.avg)+" · rango "+fmt(s2.min)+"-"+fmt(s2.max)+
+           " · "+s2.n+" registros en 30 días");
+  });
+
+  L.push("");
+  L.push("ADHERENCIA");
+  var d30=0;
+  for(var i=0;i<30;i++){
+    var d=new Date(); d.setDate(d.getDate()-i);
+    var s3=dayState(iso(d)), n=0;
+    for(var k2 in s3){ if(s3[k2]===true) n++; }
+    if(n>=5) d30++;
+  }
+  L.push("Días con protocolo cumplido: "+d30+" de los últimos 30 ("+Math.round(d30/30*100)+"%)");
+
+  var pl=painLog().filter(function(p){ return daysBetween(p.d,today())<=90; });
+  if(pl.length){
+    L.push("");
+    L.push("MOLESTIAS (90 días)");
+    pl.slice(-12).forEach(function(p){
+      L.push("- "+p.d+" · "+p.zona+" · intensidad "+p.int+"/10"+
+             (p.ex?" · "+p.ex:"")+(p.nota?" · "+p.nota:""));
+    });
+  }
+
+  var cargas=[];
+  [["sentadilla","Sentadilla"],["pm_convencional","Peso muerto"],["press_banca","Press banca"],
+   ["press_mil_manc","Press militar mancuernas"]]
+    .forEach(function(p){
+      var l=exLog(p[0]);
+      if(l.length) cargas.push(p[1]+": "+l[l.length-1].kg+" kg ("+l[l.length-1].d+")");
+    });
+  if(cargas.length){ L.push(""); L.push("CARGAS ACTUALES"); cargas.forEach(function(x){ L.push("- "+x); }); }
+
+  L.push("");
+  L.push("ANTECEDENTES RELEVANTES");
+  L.push("- Ronquido confirmado por tercera persona. Colapso faríngeo documentado por otorrino.");
+  L.push("- Cirugía previa de tabique y cornetes; persiste mala respiración nasal.");
+  L.push("- Poligrafía domiciliaria previa negativa (no descarta apnea leve ni SRVAS).");
+  L.push("- Protrusiones cervicales C5-C7. Bruxismo con férula.");
+  L.push("- SIBO de metano tratado. H. pylori IgG positivo, en tratamiento erradicador.");
+  L.push("- IgE específica positiva a Dermatophagoides pteronyssinus y farinae.");
+  return L.join("\n");
+}
+function modalBackup(){
+  var dump={};
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k==="cfg"||k.indexOf("d_")===0||k.indexOf("ex_")===0||k==="metrics"||k==="pain")
+      dump[k]=localStorage.getItem(k);
+  }
+  return modal('<h3>Copia de seguridad</h3>'+
+    '<div class="sd">Guarda este texto en tus notas o envíatelo por correo. Es todo tu historial.</div>'+
+    '<div class="fld"><textarea id="bk" style="min-height:220px;font-size:11px" readonly>'+
+    esc(JSON.stringify(dump))+'</textarea></div>'+
+    '<button class="cta f" data-copy="bk">Copiar</button>'+
+    '<button class="ghost" data-mclose="1">Cerrar</button>');
+}
+function modalImport(){
+  return modal('<h3>Restaurar copia</h3>'+
+    '<div class="sd">Pega aquí el texto de una copia anterior. Sustituirá los datos actuales.</div>'+
+    '<div class="fld"><textarea id="imp" style="min-height:180px;font-size:11px" placeholder="{...}"></textarea></div>'+
+    '<button class="cta f" data-doimport="1">Restaurar</button>'+
+    '<button class="ghost" data-mclose="1">Cancelar</button>');
+}
+
+/* ============================================================
+   13. RENDER GENERAL
+   ============================================================ */
+function renderAll(){
+  var B=buildDay(selDay), c=countDay(B);
+  var plan=cfg().plan[selDay];
+  var label = ENT[plan] ? ENT[plan].t+" · "+ENT[plan].sub
+            : (plan==="off" ? "Descanso · movilidad y cuello" : "Libre · mantenimiento");
+
+  document.getElementById("hday").textContent = DIAS[selDay];
+  document.getElementById("hsub").textContent =
+    (selDay===todayIdx() ? fechaLarga() + " · hoy" : label);
+  document.getElementById("ring").innerHTML = ringHTML(c.d,c.t);
+
+  var ds="";
+  for(var i=0;i<7;i++){
+    ds+='<button data-day="'+i+'" class="'+(i===selDay?"on":"")+(i===todayIdx()?" hoy":"")+'">'+
+        CORTO[i]+'</button>';
+  }
+  document.getElementById("dsel").innerHTML=ds;
+
+  var body = view==="hoy"?viewHoy()
+           : view==="prog"?viewProgreso()
+           : view==="ajus"?viewAjustes()
+           : viewGuia();
+  document.getElementById("main").innerHTML=body;
+
+  var tabs=[["hoy","☰","Hoy"],["prog","◔","Progreso"],["ajus","⚙","Ajustes"],["guia","ⓘ","Guía"]];
+  document.getElementById("tabs").innerHTML = tabs.map(function(t){
+    return '<button data-tab="'+t[0]+'" class="'+(view===t[0]?"on":"")+'">'+
+      '<span class="ic">'+t[1]+'</span>'+t[2]+'</button>';
+  }).join("");
+
+  var lay="";
+  if(sess) lay+=sessionHTML();
+  else if(timerId) lay+=timerHTML();
+  if(layerEl) lay+=layerEl;
+  if(toastId) lay+='<div class="toast"><span style="flex:1">Día reiniciado</span>'+
+    '<button data-undo="1">Deshacer</button></div>';
+  document.getElementById("layer").innerHTML=lay;
+}
+
+/* ============================================================
+   14. EVENTOS
+   ============================================================ */
+function closeModal(){ layerEl=null; renderAll(); }
+
+document.addEventListener("click",function(ev){
+  var origin=ev.target;
+
+  /* el fondo oscuro solo cierra si se toca el fondo mismo,
+     nunca al escribir o tocar dentro de la hoja */
+  if(origin && origin.className==="ov"){ return closeModal(); }
+
+  var t=origin;
+  while(t && t!==document.body && !(t.getAttribute && hasData(t))) t=t.parentNode;
+  if(!t || t===document.body || !t.getAttribute) return;
+  var g=function(a){ return t.getAttribute(a); };
+  /* dentro de un modal, ignorar el data-ovclose heredado del contenedor */
+  if(g("data-ovclose") && t!==origin) return;
+
+  /* navegación */
+  if(g("data-tab")){ view=g("data-tab"); openBlk=null; window.scrollTo(0,0); return renderAll(); }
+  if(g("data-day")!==null && g("data-day")!==undefined && g("data-day")!==""){
+    selDay=parseInt(g("data-day"),10); openBlk=null; window.scrollTo(0,0); return renderAll(); }
+  if(g("data-blk")!==null && g("data-blk")!==undefined && g("data-blk")!==""){
+    var b=parseInt(g("data-blk"),10); openBlk = (openBlk===b?-1:b); return renderAll(); }
+
+  /* check */
+  if(g("data-chk")){
+    var k=g("data-chk"), s=st();
+    s[k]=!s[k]; setSt(s);
+    var it=findItem(k);
+    if(it && s[k] && it.t) startTimer(it.t, it.n);
+    return renderAll();
+  }
+
+  /* sesión */
+  if(g("data-sess")){ openSession(g("data-sess")); return; }
+  if(g("data-sclose")){ saveCurrentSet(); sess=null; stopTimer(); return renderAll(); }
+  if(g("data-snav")){
+    saveCurrentSet();
+    var e=ENT[sess.plan], d=parseInt(g("data-snav"),10);
+    if(sess.i+d<0){ return; }
+    if(sess.i+d>=e.ex.length){ sess=null; stopTimer(); return renderAll(); }
+    sess.i+=d; stopTimer(); window.scrollTo(0,0); return renderAll();
+  }
+  if(g("data-set")){
+    var n=parseInt(g("data-set"),10), ex2=ENT[sess.plan].ex[sess.i], s2=st();
+    var cur=s2["sets_"+ex2.id]||0;
+    s2["sets_"+ex2.id] = (cur===n ? n-1 : n);
+    if(s2["sets_"+ex2.id]>=(ex2.sets||1)) s2["ex_"+ex2.id]=true;
+    else s2["ex_"+ex2.id]=false;
+    setSt(s2);
+    if(s2["sets_"+ex2.id]>cur) startTimer(ex2.tipo==="comp"?120:60,"Descanso · "+ex2.n);
+    return renderAll();
+  }
+  if(g("data-rpe")){
+    var ex3=ENT[sess.plan].ex[sess.i], s3=st();
+    s3["rpe_"+ex3.id]=parseInt(g("data-rpe"),10); setSt(s3);
+    return renderAll();
+  }
+
+  /* temporizador */
+  if(g("data-timer")==="stop"){ stopTimer(); return renderAll(); }
+  if(g("data-timer")==="add"){ timerLeft+=30; return renderAll(); }
+
+  /* modales */
+  if(g("data-mclose")){ return closeModal(); }
+  if(g("data-open")){
+    var w=g("data-open");
+    if(w==="peso") layerEl=modalPeso();
+    else if(w==="energia") layerEl=modalEnergia();
+    else if(w==="noche") layerEl=modalNoche();
+    else if(w==="pain") layerEl=modalPain(g("data-painex")||"");
+    else if(w==="export") layerEl=modalExport();
+    else if(w==="backup") layerEl=modalBackup();
+    else if(w==="import") layerEl=modalImport();
+    return renderAll();
+  }
+  if(g("data-sc")){
+    setMetric(curDateKey(), g("data-sc"), parseInt(g("data-v"),10));
+    if(g("data-sc")==="energia") return closeModal();
+    return renderAll();
+  }
+  if(g("data-save")==="peso"){
+    var inp=document.getElementById("mv");
+    if(inp) setMetric(curDateKey(),"peso",inp.value.trim().replace(".",","));
+    return closeModal();
+  }
+  if(g("data-pint")){
+    var all=document.querySelectorAll("[data-pint]");
+    for(var z=0;z<all.length;z++) all[z].className="";
+    t.className="on";
+    return;
+  }
+  if(g("data-savepain")!==null && g("data-savepain")!==undefined){
+    var zo=document.getElementById("pz"), nt=document.getElementById("pn");
+    var sel=document.querySelector("[data-pint].on");
+    addPain({d:today(), zona:zo?zo.value:"Otra", int:sel?sel.getAttribute("data-pint"):"?",
+             ex:g("data-savepain")||"", nota:nt?nt.value.trim():""});
+    return closeModal();
+  }
+  if(g("data-copy")){
+    var ta=document.getElementById(g("data-copy"));
+    if(ta){
+      ta.removeAttribute("readonly"); ta.select();
+      try{ document.execCommand("copy"); }catch(e){}
+      if(navigator.clipboard) try{ navigator.clipboard.writeText(ta.value); }catch(e){}
+      ta.setAttribute("readonly","readonly");
+      t.textContent="Copiado";
+    }
+    return;
+  }
+  if(g("data-doimport")){
+    var ia=document.getElementById("imp");
+    if(ia){
+      try{
+        var obj=JSON.parse(ia.value);
+        for(var kk in obj) localStorage.setItem(kk,obj[kk]);
+        closeModal(); window.scrollTo(0,0);
+      }catch(e){ t.textContent="Texto no válido"; }
+    }
     return;
   }
 
-  if(t.getAttribute("data-reset")){
-    if(window.confirm("¿Reiniciar todas las marcas de hoy?")){
-      setState({});
-      render();
+  /* config */
+  if(g("data-c")){
+    var c2=cfg(), field=g("data-c"), v=parseInt(g("data-v"),10);
+    if((field==="pelv"||field==="mio") && v>0 && !c2[field]){
+      c2[field==="pelv"?"pelvStart":"mioStart"]=today();
     }
-    return;
+    if((field==="pelv"||field==="mio") && v===0){
+      c2[field==="pelv"?"pelvStart":"mioStart"]=null;
+    }
+    c2[field]=v; setCfg(c2); return renderAll();
+  }
+  if(g("data-plan")!==null && g("data-plan")!==undefined && g("data-plan")!==""){
+    var c3=cfg(); c3.plan[parseInt(g("data-plan"),10)]=g("data-pv"); setCfg(c3);
+    openBlk=null; return renderAll();
+  }
+
+  /* reset con deshacer */
+  if(g("data-reset")){
+    undoSnap=JSON.stringify(st());
+    setSt({});
+    if(toastId) clearTimeout(toastId);
+    toastId=setTimeout(function(){ toastId=null; undoSnap=null; renderAll(); },6000);
+    return renderAll();
+  }
+  if(g("data-undo")){
+    if(undoSnap){ try{ setSt(JSON.parse(undoSnap)); }catch(e){} }
+    if(toastId) clearTimeout(toastId);
+    toastId=null; undoSnap=null; return renderAll();
   }
 });
 
-document.addEventListener("change", function(ev){
-  var t = ev.target;
-  if(!t || !t.getAttribute) return;
-  var w = t.getAttribute("data-w");
-  if(w){
-    var st = getState();
-    st["w_"+w] = t.value;
-    setState(st);
+function hasData(el){
+  var a=el.attributes;
+  if(!a) return false;
+  for(var i=0;i<a.length;i++) if(a[i].name.indexOf("data-")===0) return true;
+  return false;
+}
+function findItem(id){
+  var B=buildDay(selDay), r=null;
+  B.forEach(function(b){ b.items.forEach(function(i){ if(i.id===id) r=i; }); });
+  return r;
+}
+function saveCurrentSet(){
+  if(!sess) return;
+  var ex=ENT[sess.plan].ex[sess.i];
+  if(!ex.w) return;
+  var inp=document.getElementById("sw");
+  var s=st();
+  if(inp && inp.value.trim()){
+    s["w_ex_"+ex.id]=inp.value.trim();
+    setSt(s);
+    pushExLog(ex.id,{d:curDateKey(), kg:inp.value.trim().replace(".",","),
+                     rpe:(s["rpe_"+ex.id]!=null?s["rpe_"+ex.id]:null)});
   }
+}
+
+document.addEventListener("change",function(ev){
+  var t=ev.target;
+  if(t && t.id==="sw") saveCurrentSet();
 });
 
-renderHeader();
-render();
+syncDay();
+renderAll();
 </script>
-
 </body>
 </html>
