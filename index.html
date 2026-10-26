@@ -249,12 +249,20 @@ function daysBetween(a,b){
 }
 
 var DEF_CFG = {
-  cuello:1, pelv:1, mio:0, mov:1,
+  cuello:1, pelv:1, mio:1, mov:1,
   pelvStart:null, mioStart:null, autoPhase:1,
-  plan:["upperA","lowerA","upperB","lowerB","upperC","off","off"]
+  plan:["fuerza","zona2","fuerza","zona2","fuerza","aire","off"], planV:2
 };
+var PLAN_OK={fuerza:1,zona2:1,intervalos:1,aire:1,off:1};
 function cfg(){ var c=rd("cfg",null); if(!c) return JSON.parse(JSON.stringify(DEF_CFG));
+  var mig = c.planV!==2 || !c.plan || c.plan.some(function(p){ return !PLAN_OK[p]; });
   for(var k in DEF_CFG) if(!(k in c)) c[k]=DEF_CFG[k];
+  if(mig){
+    /* 26/10/2026: del programa estético de cinco días al programa de salud */
+    c.plan=DEF_CFG.plan.slice(); c.planV=2;
+    if(!c.mio){ c.mio=1; c.mioStart=today(); }
+    wr("cfg",c);
+  }
   return c; }
 function setCfg(c){ wr("cfg",c); }
 
@@ -303,99 +311,111 @@ var DOM = {
   reg:{c:"var(--reg)",n:"Registro"}
 };
 
-/* calentamientos específicos */
+/* programa de salud (entrenamiento-salud.md, 26/10/2026) */
 var WARM = {
-  upper:[
-    {id:"w_band",n:"Rotación externa con banda",s:"2×15 por lado",
-     h:"Codo pegado al costado. Prepara el manguito rotador antes de cualquier press."},
-    {id:"w_scap",n:"Dislocaciones con palo o banda",s:"2×12",
-     h:"Agarre ancho, movimiento lento. Abre el hombro sin forzar."},
-    {id:"w_pushup",n:"Flexiones escapulares",s:"2×12",
-     h:"En plancha, solo junta y separa los omóplatos sin doblar los codos."},
-    {id:"w_serie",n:"Serie de aproximación del primer ejercicio",s:"2 series ligeras",
-     h:"50% y 70% del peso de trabajo. No cuenta como serie efectiva."}
-  ],
-  piernas:[
-    {id:"w_bike",n:"Bicicleta suave",s:"5 min",t:300,
-     h:"Solo para subir temperatura, sin intensidad."},
-    {id:"w_ankle",n:"Movilidad de tobillo contra pared",s:"2×10 por lado",
-     h:"Rodilla sobrepasando la punta del pie sin despegar el talón. Condiciona la profundidad de sentadilla."},
-    {id:"w_hip90",n:"90/90 dinámico",s:"10 rotaciones por lado"},
-    {id:"w_glute",n:"Puente de glúteo",s:"2×15",
-     h:"Activación previa. Un glúteo dormido hace que el cuádriceps y la rodilla asuman de más."},
-    {id:"w_sq",n:"Series de aproximación de sentadilla",s:"3 series",
-     h:"Barra vacía, 50% y 75%. Con la rodilla izquierda en observación, esto no es opcional."}
+  salud:[
+    {id:"w_bike",n:"Bici, remo o cinta inclinada suave",s:"5 min, respirando por la nariz",t:300,
+     h:"Solo subir temperatura. Si no puedes respirar por la nariz, vas demasiado fuerte."},
+    {id:"w_tora",n:"Extensión torácica en foam roller",s:"1-2 min",t:90,
+     h:"Manos detrás de la cabeza, codos juntos. Una dorsal rígida obliga al cuello a compensar."},
+    {id:"w_openbook",n:"Open book tumbado de lado",s:"8 por lado"},
+    {id:"w_chin",n:"Chin tuck tumbado",s:"1×10, mantener 5 s",t:5,
+     h:"Asentimiento suave, sin levantar la cabeza. Activa los flexores profundos del cuello."},
+    {id:"w_yt",n:"Y-T boca abajo sin peso o band pull-apart",s:"1×10"},
+    {id:"w_glute",n:"Puente de glúteo",s:"1×10"},
+    {id:"w_serie",n:"Series de aproximación del primer ejercicio",s:"1-2 series ligeras",
+     h:"50% y 75% del peso de trabajo. No cuentan como series efectivas."}
   ]
 };
 
 var ENT = {
-  upperA:{t:"Upper A",sub:"Fuerza y empuje",mins:70,warm:"upper",ex:[
-    {id:"press_banca",n:"Press banca plano",s:"4×6-8",sets:4,w:1,tipo:"comp"},
-    {id:"press_mil_barra",n:"Press militar con barra",s:"4×6-8",sets:4,w:1,tipo:"comp"},
-    {id:"press_incl_manc",n:"Press inclinado mancuernas",s:"3×8-10",sets:3,w:1,tipo:"comp"},
-    {id:"lat_manc_A",n:"Elevaciones laterales mancuernas",s:"4×15-20",sets:4,w:1,tipo:"ais"},
-    {id:"lat_polea_A",n:"Elevaciones laterales polea baja",s:"3×15-20",sets:3,w:1,tipo:"ais"},
-    {id:"tri_cuerda",n:"Tríceps polea con cuerda",s:"3×15-20",sets:3,w:1,tipo:"ais"},
-    {id:"tri_cabeza",n:"Tríceps sobre cabeza",s:"3×12-15",sets:3,w:1,tipo:"ais"},
-    {id:"face_pulls_A",n:"Face pulls",s:"4×15-20",sets:4,w:0,tipo:"ais",
-     h:"Obligatorios en los tres días de Upper. Son deltoides posterior y postura cervical a la vez."}
+  fuerzaA:{t:"Fuerza A",sub:"Cuerpo completo",mins:60,warm:"salud",ex:[
+    {id:"goblet",n:"Sentadilla goblet a cajón",rep:"8-10",sets:3,main:1,w:1,tipo:"comp",
+     h:"Superserie con el remo, 90 s de descanso. A paralelo. Rodilla izquierda: hasta 3/10 si al día siguiente no estás peor. Gimnasio: igual o prensa."},
+    {id:"remo_1b",n:"Remo a una mano con apoyo en banco",rep:"10 por lado",sets:3,main:1,w:1,tipo:"comp",
+     h:"Pausa de 1 s arriba. Correas si molesta el antebrazo izquierdo. Gimnasio: igual o remo en polea sentado."},
+    {id:"press_incl",n:"Press inclinado a 30°, agarre neutro",rep:"8-10",sets:3,main:1,w:1,tipo:"comp",
+     h:"Superserie con el peso muerto rumano. Hombros abajo y atrás, mandíbula suelta. Si la herida de la cabeza apoya en el banco, flexiones."},
+    {id:"pm_rumano_m",n:"Peso muerto rumano",rep:"8-10",sets:3,main:1,w:1,tipo:"comp",
+     h:"Bajar en 3 s, espalda neutra, sin apnea. Mancuernas en casa; mancuernas o barra en el gimnasio."},
+    {id:"zancada",n:"Zancada atrás",rep:"8 por lado",sets:2,w:1,tipo:"comp",
+     h:"Superserie con las Y-T. Rodilla izquierda hasta 3/10."},
+    {id:"yt",n:"Y y T boca abajo en banco inclinado",rep:"10 de cada",sets:2,w:1,tipo:"ais",
+     h:"2-5 kg, 2 s arriba. Trapecio inferior y medio: corrige la postura sin tener que estar recto a base de fuerza de voluntad."},
+    {id:"deadbug",n:"Dead bug lento + Pallof press",rep:"8 + 10 por lado",sets:2,w:0,tipo:"ais",
+     h:"Tronco sin cargar el cuello. Pallof con goma en casa, en polea en el gimnasio."}
   ]},
-  lowerA:{t:"Lower A",sub:"Cuádriceps",mins:70,warm:"piernas",ex:[
-    {id:"sentadilla",n:"Sentadilla con barra",s:"4×6-8",sets:4,w:1,tipo:"comp",r:"100 kg",
-     h:"Rodilla izquierda en observación. Si aparece molestia rotuliana baja carga; si persiste a 90 kg, registra la molestia y pasa al resto de la sesión."},
-    {id:"prensa",n:"Prensa",s:"3×12-15",sets:3,w:1,tipo:"comp"},
-    {id:"ext_cuad",n:"Extensión de cuádriceps",s:"3×15-20",sets:3,w:1,tipo:"ais"},
-    {id:"curl_fem_tumb",n:"Curl femoral tumbado",s:"4×15-20",sets:4,w:1,tipo:"ais"},
-    {id:"talones_pie",n:"Elevación de talones de pie",s:"3×20",sets:3,w:1,tipo:"ais"},
-    {id:"crunch_peso",n:"Core · crunch con peso",s:"3×15",sets:3,w:1,tipo:"ais"},
-    {id:"crunch_lat",n:"Core · crunch lateral con mancuerna",s:"3×15 por lado",sets:3,w:1,tipo:"ais"},
-    {id:"plancha",n:"Core · plancha",s:"3×45 s",sets:3,w:0,tipo:"ais",t:45},
-    {id:"elev_piernas_A",n:"Core · elevación de piernas",s:"3×15",sets:3,w:0,tipo:"ais"},
-    {id:"bici_A",n:"Bicicleta",s:"20 min",sets:1,w:0,tipo:"ais",t:1200,
-     h:"Obligatoria los días de pierna. Parte del objetivo de definición sin volumen excesivo."}
-  ]},
-  upperB:{t:"Upper B",sub:"Tirón, hombro y brazos",mins:75,warm:"upper",ex:[
-    {id:"dominadas",n:"Dominadas o jalón al pecho",s:"4×6-8",sets:4,w:1,tipo:"comp"},
-    {id:"remo_barra",n:"Remo con barra",s:"4×6-8",sets:4,w:1,tipo:"comp"},
-    {id:"remo_polea",n:"Remo en polea baja",s:"3×15-20",sets:3,w:1,tipo:"comp"},
-    {id:"lat_manc_B",n:"Elevaciones laterales mancuernas",s:"4×15-20",sets:4,w:1,tipo:"ais"},
-    {id:"pajaro_B",n:"Pájaro con mancuernas",s:"3×15-20",sets:3,w:1,tipo:"ais"},
-    {id:"curl_barra",n:"Curl bíceps con barra",s:"4×15-20",sets:4,w:1,tipo:"ais"},
-    {id:"curl_predicador",n:"Curl predicador o en polea",s:"3×12-15",sets:3,w:1,tipo:"ais"},
-    {id:"curl_martillo",n:"Curl martillo",s:"3×12-15",sets:3,w:1,tipo:"ais"},
-    {id:"face_pulls_B",n:"Face pulls",s:"5×15-20",sets:5,w:0,tipo:"ais"},
-    {id:"dead_hang",n:"Dead hangs",s:"3×30-45 s",sets:3,w:0,tipo:"ais",t:40,
-     h:"Agarre y antebrazo. Aprovecha que hoy ya hay barra, y prepara la escalada."}
-  ]},
-  lowerB:{t:"Lower B",sub:"Isquiotibial",mins:70,warm:"piernas",ex:[
-    {id:"pm_convencional",n:"Peso muerto convencional",s:"4×5-6",sets:4,w:1,tipo:"comp",r:"110 kg"},
-    {id:"pm_rumano",n:"Peso muerto rumano",s:"3×8-10",sets:3,w:1,tipo:"comp",r:"70 kg, excéntrica lenta"},
-    {id:"curl_fem_sent",n:"Curl femoral sentado",s:"4×15-20",sets:4,w:1,tipo:"ais"},
-    {id:"hip_thrust",n:"Hip thrust con carga",s:"3×12-15",sets:3,w:1,tipo:"comp"},
-    {id:"talones_sent",n:"Elevación de talones sentado",s:"4×20",sets:4,w:1,tipo:"ais"},
-    {id:"elev_piernas_B",n:"Core · elevación de piernas",s:"3×15",sets:3,w:0,tipo:"ais"},
-    {id:"rueda_ab",n:"Core · rueda abdominal",s:"3×15, mantener 3-5 s",sets:3,w:0,tipo:"ais"},
-    {id:"dead_bug",n:"Core · dead bug",s:"3×12 por lado",sets:3,w:0,tipo:"ais"},
-    {id:"farmer",n:"Farmer's carry",s:"3×25 m",sets:3,w:1,tipo:"comp",r:"empieza con 20-24 kg/mano",
-     h:"Agarre, antebrazo, trapecio y core a la vez. Camina erguido; si el agarre falla antes de los 20 m, baja peso."},
-    {id:"bici_B",n:"Bicicleta",s:"20 min",sets:1,w:0,tipo:"ais",t:1200}
-  ]},
-  upperC:{t:"Upper C",sub:"Hombro, brazos y complemento",mins:75,warm:"upper",ex:[
-    {id:"press_mil_manc",n:"Press militar mancuernas",s:"4×8-10",sets:4,w:1,tipo:"comp",r:"22,5 kg/mano"},
-    {id:"lat_manc_C",n:"Elevaciones laterales mancuernas",s:"5×15-20",sets:5,w:1,tipo:"ais",
-     h:"Cinco series. El deltoides medio es la prioridad del físico que buscas: 19 series semanales entre los tres Upper."},
-    {id:"lat_polea_C",n:"Elevación lateral en polea, inclinado",s:"3×15-20",sets:3,w:1,tipo:"ais",
-     h:"Inclina el tronco alejándote de la polea: más rango y más tensión donde el músculo está más corto."},
-    {id:"pajaro_C",n:"Pájaro con mancuernas",s:"3×15-20",sets:3,w:1,tipo:"ais"},
-    {id:"fondos",n:"Fondos en paralelas",s:"3×8-10",sets:3,w:1,tipo:"comp"},
-    {id:"press_cerrado",n:"Press banca agarre cerrado",s:"3×8-10",sets:3,w:1,tipo:"comp"},
-    {id:"curl_barra_C",n:"Curl bíceps con barra",s:"3×15-20",sets:3,w:1,tipo:"ais"},
-    {id:"curl_martillo_C",n:"Curl martillo",s:"3×12-15",sets:3,w:1,tipo:"ais"},
-    {id:"face_pulls_C",n:"Face pulls",s:"5×15-20",sets:5,w:0,tipo:"ais"},
-    {id:"curl_muneca",n:"Curl de muñeca y curl inverso",s:"3×15-20 cada uno",sets:3,w:1,tipo:"ais",
-     h:"Flexores y extensores del antebrazo. El inverso equilibra y previene problemas de codo."}
+  fuerzaB:{t:"Fuerza B",sub:"Cuerpo completo",mins:60,warm:"salud",ex:[
+    {id:"peso_muerto",n:"Peso muerto",rep:"6-8",sets:3,main:1,w:1,tipo:"comp",
+     h:"Superserie con las flexiones. RIR 3, espalda neutra, sin apnea. Mancuernas desde el suelo en casa; barra hexagonal en el gimnasio."},
+    {id:"flexiones",n:"Flexiones con pausa abajo",rep:"8-12",sets:3,main:1,w:1,tipo:"comp",
+     h:"Gimnasio: press de pecho en máquina. Si son sin lastre, deja el peso vacío."},
+    {id:"remo_pecho",n:"Remo con pecho apoyado en banco inclinado",rep:"10",sets:3,main:1,w:1,tipo:"comp",
+     h:"Superserie con el step-up. Gimnasio: jalón al pecho con agarre neutro o supino. Nada de agarre prono por ahora."},
+    {id:"step_up",n:"Step-up a banco",rep:"8 por lado",sets:3,main:1,w:1,tipo:"comp",
+     h:"Altura de la rodilla o menos. Sube con la pierna de arriba, sin impulso de la de abajo."},
+    {id:"press_uni",n:"Press de hombro unilateral medio arrodillado",rep:"10 por lado",sets:2,w:1,tipo:"comp",
+     h:"Superserie con el face pull. Cuello largo, sin encoger el hombro. Gimnasio: landmine press."},
+    {id:"face_pull",n:"Face pull con rotación externa",rep:"15",sets:3,w:1,tipo:"ais",
+     h:"Goma o polea. Termina con los pulgares hacia atrás."},
+    {id:"isq_lat",n:"Puente a una pierna + plancha lateral",rep:"12 + 30 s por lado",sets:2,w:0,tipo:"ais",
+     h:"Gimnasio: curl femoral en máquina en lugar del puente."}
   ]}
 };
+
+/* fases: 0 herida y polisomnografía · 1 base · 2 construcción · 3 largo plazo */
+function faseOf(dk){
+  if(dk<"2026-11-02") return 0;
+  if(dk<"2026-11-30") return 1;
+  if(dk<"2027-01-25") return 2;
+  return 3;
+}
+function faseNota(dk){
+  var f=faseOf(dk);
+  if(f===0) return "Fase 0 · semana de la herida y la polisomnografía. Sesión ligera: 2 series a RIR 4. Nada que apoye o apriete la herida.";
+  if(f===1) return "Fase 1 · base. "+(dk<"2026-11-16"?"RIR 3":"RIR 2")+": deja 2-3 repeticiones en la recámara. Nunca al fallo, sin apnea, mandíbula suelta.";
+  if(f===2) return dk>="2027-01-18" ? "Fase 2 · semana de descarga: mitad de series, misma carga."
+                                    : "Fase 2 · construcción. Los cuatro primeros ejercicios a 4 series, RIR 2.";
+  return "Fase 3 · largo plazo. Bloques de 8 semanas con una de descarga al final. RIR 2-3.";
+}
+function setsFor(x,dk){
+  var f=faseOf(dk), n=x.sets;
+  if(f===0) return 2;
+  if(f>=2 && x.main) n=4;
+  if(f===2 && dk>="2027-01-18") n=Math.ceil(n/2);
+  return n;
+}
+function entOf(key,dk){
+  var e=ENT[key]; if(!e) return null;
+  return {t:e.t,sub:e.sub,mins:e.mins,warm:e.warm,ex:e.ex.map(function(x){
+    var o={}; for(var k in x) o[k]=x[k];
+    o.sets=setsFor(x,dk); o.s=o.sets+"×"+x.rep; return o; })};
+}
+/* A-B-A una semana, B-A-B la siguiente; la fase 1 empieza el 2/11/2026 con A */
+function weekParity(dk){ var w=Math.floor(daysBetween("2026-11-02",dk)/7); return ((w%2)+2)%2; }
+/* fase 0: lunes 26 exéresis del quiste, martes paseo, jueves 29 polisomnografía */
+var FASE0_OFF={"2026-10-26":1,"2026-10-27":1,"2026-10-29":1};
+function resolvePlan(idx){
+  var c=cfg(), p=c.plan[idx];
+  if(FASE0_OFF[iso(dateOfIdx(idx))]) return "off";
+  if(p!=="fuerza") return p;
+  var k=0; for(var j=0;j<idx;j++) if(c.plan[j]==="fuerza") k++;
+  return ((k+weekParity(iso(dateOfIdx(idx))))%2===0) ? "fuerzaA" : "fuerzaB";
+}
+var PLAN_LBL={zona2:"Zona 2 · aeróbico suave",intervalos:"Intervalos 4×4",aire:"Aire libre · actividad suave",off:"Descanso · paseo y terapia"};
+
+var CALMA=[
+  {id:"cal_resp",n:"Respiración con las piernas en una silla",s:"3 min, 5 s dentro y 5 fuera por la nariz",t:180,
+   h:"Baja de revoluciones el sistema nervioso antes de seguir con el día."},
+  {id:"cal_pec",n:"Estiramiento de pectoral en el marco de una puerta",s:"30 s por lado",t:30}
+];
+var TERAPIA=[
+  {id:"antebrazo",n:"Isométrico de antebrazo izquierdo",s:"5×30-45 s, agarre neutro, codo a 90°",t:40,
+   h:"Mancuerna ligera. Molestia hasta 3/10 si al día siguiente no estás peor."},
+  {id:"rodilla",n:"Sentadilla isométrica contra la pared",s:"4×45 s a 60-70°, solo si molesta la rodilla",t:45,
+   h:"Analgésica para el tendón. Si la rodilla no molesta, márcalo como hecho y sigue."},
+  {id:"resp",n:"Respiración diafragmática",s:"5 min, mano en el abdomen, 5-5 por la nariz",t:300}
+];
 
 var CUELLO_A = [
   {id:"chin_tumb",n:"Chin tuck tumbado",s:"3×10, mantener 10 s",t:10,
@@ -518,82 +538,102 @@ var CORTO=["L","M","X","J","V","S","D"];
    3. CONSTRUCCIÓN DEL DÍA
    ============================================================ */
 function buildDay(idx){
-  var c=cfg(), plan=c.plan[idx], B=[];
+  var c=cfg(), plan=resolvePlan(idx), B=[];
+  var dk=iso(dateOfIdx(idx)), fase=faseOf(dk);
   var pf=phaseOf("pelv"), mf=phaseOf("mio");
 
   /* despertar */
   var wake=[{id:"metrics",n:"Peso y energía al despertar",s:"toca para registrar",dom:"reg",metric:1,
-    h:"La energía matutina es tu síntoma principal. Es lo que más debería moverse con el protocolo de vía aérea."}];
+    h:"La energía matutina es tu síntoma principal. Es lo que más debería moverse con el sueño y la vía aérea."},
+    {id:"luz",n:"Luz exterior",s:"10-15 min en la calle, sin gafas de sol",dom:"aire",
+     h:"La luz de casa da unas 300 lux; la calle, más de mil incluso nublado. Es lo que fija el reloj interno."},
+    {id:"semaforo",n:"Semáforo del día",s:"verde: sesión completa · ámbar: mínima · rojo: paseo",dom:"reg",
+     h:"Verde: sueño ≥6,5 h, energía ≥6, intestino tranquilo, dolor ≤3. Ámbar si falla uno: calentamiento, 2 series de los ejercicios principales a RIR 4 y terapia, o 30 min de zona 2. Rojo si energía ≤3, fiebre, dolor >5, hormigueo en brazos o claramente peor tras el entreno anterior: solo paseo y terapia."}];
   if(pf) PELV[pf].ex.forEach(function(e,i){
     wake.push({id:"pm_"+e.id,n:e.n,s:e.s,t:e.t,h:i===0?e.h:null,dom:"pelvi",pre:"Suelo pélvico"});
   });
-  B.push({t:"Al despertar",m:"8 min",dom:"reg",items:wake,h0:6,h1:11});
+  B.push({t:"Al despertar",m:"15 min",dom:"reg",items:wake,h0:6,h1:11});
 
   /* media mañana */
   if(mf) B.push({t:"Media mañana",m:"10 min",dom:"aire",h0:11,h1:14,
     note:"Tanda 1 de 3. En hueco muerto: coche, ducha, cocinando.",
     items:[{id:"mio1",n:"Miofuncional · tanda 1",s:MIO[mf].lbl,dom:"aire",mio:mf}]});
 
-  if(ENT[plan]){
-    var e=ENT[plan], esPierna=(plan==="lowerA"||plan==="lowerB");
-    /* calentamiento */
+  /* terapia diaria: cuello, antebrazo, rodilla, respiración */
+  function terapia(pre, conActivacion){
+    var t=[];
+    if(c.cuello){
+      (conActivacion ? CUELLO_A.concat(CUELLO_E) : CUELLO_E).forEach(function(x){
+        t.push({id:pre+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"aire"}); });
+    }
+    TERAPIA.forEach(function(x){ t.push({id:pre+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"movil"}); });
+    return t;
+  }
+
+  var e=entOf(plan,dk);
+  if(e){
     var wm=WARM[e.warm].map(function(x){ return {id:x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"movil"}; });
-    B.push({t:"Calentamiento",m:"8 min",dom:"movil",h0:16,h1:22,
-      note: esPierna
-        ? "No es opcional. Con la rodilla izquierda en observación, las series de aproximación son lo que evita el susto."
-        : "Manguito rotador y escápula antes de cualquier press. Con protrusiones C5-C7, entrar en frío es donde aparecen los problemas.",
+    B.push({t:"Calentamiento",m:"10 min",dom:"movil",h0:16,h1:19,
+      note:"Movilidad torácica y activación del cuello antes de cargar. Con C5-C7, entrar en frío es donde aparecen los problemas.",
       items:wm});
-    /* activación cervical */
-    if(c.cuello) B.push({t:"Activación cervical",m:"4 min",dom:"aire",h0:16,h1:22,
-      note:"Activación, no estiramiento. Mejora la posición escapular en press y remo.",
-      items:CUELLO_A.map(function(x){ return {id:"ca_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"aire"}; })});
-    /* sesión */
-    B.push({t:e.t,m:e.mins+" min",dom:"fuerza",h0:16,h1:22,session:plan,
+    B.push({t:e.t,m:e.mins+" min",dom:"fuerza",h0:16,h1:19,session:plan,
+      note:faseNota(dk)+" Terminar antes de las 19:00.",
       items:e.ex.map(function(x){
         return {id:"ex_"+x.id,exId:x.id,n:x.n,s:x.s,h:x.h,w:x.w,r:x.r,sets:x.sets,tipo:x.tipo,t:x.t,dom:"fuerza"};
       })});
-    /* después */
-    var post=[];
-    if(c.cuello) CUELLO_E.forEach(function(x){ post.push({id:"ce_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"aire"}); });
-    if(c.mov){
-      var set = esPierna ? MOV_ISQ.concat(MOV_CAD) : MOV_ESP.concat(MOV_CAD);
-      set.forEach(function(x){ post.push({id:"mp_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,w:x.w,dom:"movil"}); });
-    }
-    if(post.length) B.push({t:"Después de entrenar",m:(esPierna?"25 min":"20 min"),dom:"movil",h0:16,h1:23,
-      note: esPierna
-        ? "Músculo caliente: el mejor momento de la semana para ganar rango en isquios."
-        : "Nunca estires en estático antes de entrenar: reduce la producción de fuerza.",
+    var post=CALMA.map(function(x){ return {id:"vc_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"movil"}; }).concat(terapia("tp_",false));
+    B.push({t:"Vuelta a la calma y terapia",m:"15 min",dom:"movil",h0:16,h1:21,
+      note:"Calor en la nuca antes de los estiramientos si hay tensión. Nunca estiramiento estático antes de la fuerza.",
       items:post});
   } else {
-    if(c.cuello) B.push({t:"Cuello, sesión completa",m:"10 min",dom:"aire",h0:9,h1:21,
-      note:"Sin fatiga previa la calidad del trabajo es mejor que en días de gimnasio.",
-      items:CUELLO_A.concat(CUELLO_E).map(function(x){
-        return {id:"cf_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"aire"}; })});
-    if(c.mov && plan==="off"){
-      var ms=MOV_CAD.concat(MOV_ISQ,MOV_ESP).map(function(x){
-        return {id:"md_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,w:x.w,dom:"movil"}; });
-      if(idx===5) MOV_SPG.forEach(function(x){
-        ms.push({id:"ms_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"movil"}); });
-      B.push({t:"Movilidad, sesión larga",m:(idx===5?"30 min":"20 min"),dom:"movil",h0:9,h1:21,
-        note: idx===5?"El sábado incluye el trabajo específico de spagat, su frecuencia es semanal.":"",
-        items:ms});
+    if(plan==="zona2"){
+      var z=fase>=2 ? 2400 : 1800;
+      B.push({t:"Zona 2",m:(z/60)+" min",dom:"fuerza",h0:9,h1:19,
+        note:"Aeróbico suave: mejora sueño, ánimo y tolerancia al estrés con poco coste de recuperación.",
+        items:[{id:"z2",n:"Zona 2",s:(z/60)+" min · bici, elíptica, cinta inclinada o remo",t:z,dom:"fuerza",
+          h:"Puedes hablar en frases completas y respirar solo por la nariz. Orientativo 115-140 ppm. Al aire libre, mejor."}]});
+    } else if(plan==="intervalos"){
+      var it=[{id:"iv_cal",n:"Calentamiento suave",s:"8 min",t:480,dom:"fuerza"}];
+      for(var q=1;q<=4;q++){
+        it.push({id:"iv_"+q,n:"Intervalo "+q+" de 4",s:"4 min al 85-90% · 150-165 ppm",t:240,dom:"fuerza",
+          h:q===1?"Respiración fuerte, no puedes hablar. Bici o cinta inclinada: menos impacto en la rodilla.":null});
+        if(q<4) it.push({id:"iv_r"+q,n:"Recuperación suave",s:"3 min",t:180,dom:"movil"});
+      }
+      it.push({id:"iv_vc",n:"Vuelta a la calma",s:"5 min",t:300,dom:"movil"});
+      B.push({t:"Intervalos 4×4",m:"35 min",dom:"fuerza",h0:9,h1:19,
+        note: fase<2 ? "Programados desde el 30/11. Hasta entonces, haz zona 2." : "Solo con semáforo verde. Si no, cámbialos por zona 2.",
+        items:it});
+    } else if(plan==="aire"){
+      B.push({t:"Aire libre",m:"60-90 min",dom:"movil",h0:9,h1:19,
+        items:[{id:"aire",n:"Actividad al aire libre",s:"60-90 min suave · senderismo, bici, paseo largo",dom:"movil",
+          h:"Luz, movimiento y nada de pantallas. Cuenta como zona 2 si mantienes el ritmo."}]});
+    } else {
+      B.push({t:"Paseo",m:"30-45 min",dom:"movil",h0:9,h1:20,
+        items:[{id:"paseo",n:"Paseo",s:"30-45 min, sin prisa",dom:"movil"}]});
     }
+    var tb=terapia("td_",true);
+    if(c.mov) MOV_ESP.forEach(function(x){ tb.push({id:"td_"+x.id,n:x.n,s:x.s,h:x.h,t:x.t,dom:"movil"}); });
+    B.push({t:"Terapia",m:"15 min",dom:"aire",h0:9,h1:21,
+      note:"Diaria. Sin fatiga previa la calidad del trabajo de cuello es mejor que en días de fuerza.",
+      items:tb});
   }
 
   if(mf) B.push({t:"Tarde",m:"10 min",dom:"aire",h0:15,h1:20,
     items:[{id:"mio2",n:"Miofuncional · tanda 2",s:MIO[mf].lbl,dom:"aire",mio:mf}]});
 
-  var night=[];
+  var night=[{id:"pasos",n:"8.000-10.000 pasos",s:"repartidos en el día",dom:"movil"}];
   if(mf) night.push({id:"mio3",n:"Miofuncional · tanda 3",s:MIO[mf].lbl,dom:"aire",mio:mf});
   if(pf) PELV[pf].ex.forEach(function(e2){
     night.push({id:"pn_"+e2.id,n:e2.n,s:e2.s,t:e2.t,dom:"pelvi",pre:"Suelo pélvico"}); });
+  night.push({id:"pantallas",n:"Pantallas fuera a las 21:30",s:"luces cálidas y tenues desde las 21:00",dom:"aire",
+    h:"Lo que más pesa no es la luz azul, sino la activación mental y retrasar la hora de dormir. Nada de correo, trabajo ni noticias."});
+  night.push({id:"resp_noche",n:"Respiración lenta",s:"10 min, 5 s dentro y 5 fuera",t:600,dom:"aire"});
   night.push({id:"lado",n:"Dormir de lado, no boca arriba",s:"lo más importante de la noche",dom:"aire",
-    h:"Con colapso faríngeo la postura supina empeora el cierre por gravedad. Pelota de tenis cosida en la espalda del pijama si te giras dormido."});
+    h:"Tu poligrafía: 7,2 eventos por hora boca arriba y 0 de lado. Pelota de tenis en un calcetín cosido a la espalda de una camiseta si te giras dormido."});
   night.push({id:"cabecera",n:"Cabecera elevada 10-15 cm",s:"",dom:"aire"});
-  night.push({id:"pantallas",n:"Sin móvil antes de dormir",s:"música suave en su lugar",dom:"aire"});
   night.push({id:"sintomas",n:"Registro de la noche",s:"toca para registrar",dom:"reg",night:1,
     h:"Cefalea, ronquido y digestión. Es lo que llevarás a la neumóloga y al digestivo."});
-  B.push({t:"Noche",m:"12 min",dom:"aire",h0:21,h1:24,items:night});
+  B.push({t:"Noche",m:"20 min",dom:"aire",h0:21,h1:24,items:night});
 
   return B;
 }
@@ -623,9 +663,10 @@ function suggest(exId,tipo){
   if(isNaN(kg)) return null;
   var step = tipo==="comp" ? 2.5 : 1;
   if(e.rpe==null) return {kg:kg,txt:"repite "+fmt(kg)+" kg y anota el RPE"};
-  if(e.rpe<=7) return {kg:kg+step,txt:"sube a "+fmt(kg+step)+" kg"};
-  if(e.rpe<=8.5) return {kg:kg,txt:"mantén "+fmt(kg)+" kg y busca una repetición más"};
-  return {kg:kg,txt:"repite "+fmt(kg)+" kg, el último fue muy exigente"};
+  if(e.rpe<=7) return {kg:kg,txt:"si llegaste al tope del rango, sube a "+fmt(kg+step)+" kg; si no, mantén y busca una repetición más"};
+  if(e.rpe<=8) return {kg:kg,txt:"mantén "+fmt(kg)+" kg, estás en el esfuerzo objetivo"};
+  var low=Math.max(0,kg-step);
+  return {kg:low,txt:"baja a "+fmt(low)+" kg: el objetivo es RPE 7-8, nunca al fallo"};
 }
 function fmt(n){ return (Math.round(n*10)/10).toString().replace(".",","); }
 
@@ -853,9 +894,9 @@ function viewProgreso(){
 
   /* cargas */
   h+='<h3>Cargas de referencia</h3>';
-  var keyEx=[["sentadilla","Sentadilla"],["pm_convencional","Peso muerto"],
-             ["pm_rumano","Peso muerto rumano"],["press_banca","Press banca"],
-             ["press_mil_manc","Press militar mancuernas"],["dominadas","Dominadas o jalón"]];
+  var keyEx=[["goblet","Sentadilla goblet"],["peso_muerto","Peso muerto"],
+             ["pm_rumano_m","Peso muerto rumano"],["press_incl","Press inclinado"],
+             ["remo_1b","Remo a una mano"],["step_up","Step-up"]];
   var any=false, tbl='<div class="chart">';
   keyEx.forEach(function(p){
     var l=exLog(p[0]);
@@ -933,10 +974,10 @@ function viewAjustes(){
      '<button data-c="autoPhase" data-v="1" class="'+(c.autoPhase===1?'on':'')+'">Automático</button></div></div>';
 
   h+='<h3>Días de entrenamiento</h3>';
-  h+='<div class="note">Cinco días alternando Upper y Lower, con el fin de semana libre para recuperar del todo. Si una semana no te cuadra, muévelo aquí, pero no pongas dos Upper seguidos: comparten hombro y brazos.</div>';
+  h+='<div class="note">Tres días de fuerza no consecutivos. La app alterna A y B sola: A-B-A una semana, B-A-B la siguiente. Zona 2 en los días intermedios. Desde el 30/11, cambia uno de los días de zona 2 por 4×4.</div>';
   for(var d=0;d<7;d++){
     h+='<div class="cfgrow"><div class="ct">'+DIAS[d]+'</div><div class="seg">';
-    [["upperA","Up A"],["lowerA","Low A"],["upperB","Up B"],["lowerB","Low B"],["upperC","Up C"],["off","Movil."],["libre","Libre"]]
+    [["fuerza","Fuerza"],["zona2","Zona 2"],["intervalos","4×4"],["aire","Aire"],["off","Desc."]]
       .forEach(function(o){
         h+='<button data-plan="'+d+'" data-pv="'+o[0]+'" class="'+(c.plan[d]===o[0]?'on':'')+'"'+
            ' style="font-size:11px;padding:10px 2px">'+o[1]+'</button>';
@@ -957,18 +998,31 @@ function viewAjustes(){
    ============================================================ */
 function viewGuia(){
   var c=cfg(), mf=phaseOf("mio");
-  var h='<h2>Guía</h2><div class="lead">Reglas, avisos y seguimiento clínico</div>';
+  var h='<h2>Guía</h2><div class="lead">Programa de salud desde el 26/10/2026</div>';
+
+  h+='<div class="note"><b>'+esc(faseNota(today()))+'</b></div>';
 
   h+='<h3>Las reglas que no se saltan</h3><ul>';
-  h+='<li><b>Estiramiento estático antes de fuerza: nunca.</b> Reduce la producción de fuerza de forma aguda. Movilidad siempre después.</li>';
-  h+='<li><b>Suelo pélvico fuerte y día de piernas: separados.</b> Sentadilla y peso muerto ya lo cargan. La tanda intensa va por la noche.</li>';
-  h+='<li><b>Cuello antes de Upper: sí.</b> Chin tucks y retracción escapular son activación, no estiramiento.</li>';
-  h+='<li><b>Upper y Lower alternos.</b> La división de cinco días ya deja 48 h entre grupos: Upper A lunes, Upper B miércoles, Upper C viernes.</li>';
+  h+='<li><b>Nunca al fallo.</b> RIR 2-3 (RPE 7-8), sin apnea. El esfuerzo máximo activa el simpático, sube la presión en la cabeza y empeora sueño y cefalea.</li>';
+  h+='<li><b>Regla de dolor.</b> Hasta 3/10 durante el ejercicio, si al día siguiente no estás peor.</li>';
+  h+='<li><b>Semáforo antes de entrenar.</b> Verde: sesión completa. Ámbar: mínima. Rojo: paseo y terapia.</li>';
+  h+='<li><b>Terminar antes de las 19:00.</b> Entrenar tarde retrasa el sueño.</li>';
+  h+='<li><b>Estiramiento estático antes de fuerza: nunca.</b> Movilidad antes, estiramiento después.</li>';
+  h+='<li><b>Mandíbula suelta y lengua en el paladar</b> durante las series. Respiración nasal en calentamiento, zona 2 y descansos.</li>';
   h+='</ul>';
 
-  h+='<div class="note bad"><b>Protrusiones C5-C7.</b> Nada de flexión cervical forzada bajo carga, ni rotaciones bruscas, ni círculos completos de cuello. Si algo genera hormigueo o dolor que baja al brazo, paras y lo registras.</div>';
-  h+='<div class="note bad"><b>Suelo pélvico, nunca durante la micción.</b> Cortar el chorro sirve para identificar el músculo la primera vez, no como entrenamiento: repetirlo deja vaciado incompleto y altera la coordinación vejiga-esfínter. Y la relajación importa tanto como la contracción: si notas molestia perineal o urgencia urinaria, para una semana.</div>';
-  h+='<div class="note warn"><b>Rodilla izquierda.</b> Molestia rotuliana que apareció a 120 kg y persistía a 90 kg. Sin revisar. Sentadilla profunda cargada en observación: registra cualquier molestia para tener el histórico.</div>';
+  h+='<div class="note bad"><b>Protrusiones C5-C6 y C6-C7.</b> Sin barra sobre la espalda, sin encogimientos, sin abdominales con flexión de cuello, sin rotaciones bruscas. Si algo genera hormigueo o dolor que baja al brazo, paras y lo registras.</div>';
+  h+='<div class="note warn"><b>Antebrazo izquierdo.</b> Sin curl, martillo, dominadas en prono ni farmer\'s carry hasta que esté bien. Correas en los tirones si molesta.</div>';
+  h+='<div class="note warn"><b>Rodilla izquierda.</b> Goblet a cajón a paralelo, zancada atrás y step-up bajo. Si molesta, isométrico contra la pared en la terapia.</div>';
+  h+='<div class="note warn"><b>Post-COVID.</b> Si 24-48 h después de entrenar estás desproporcionadamente agotado, baja a la fase anterior y coméntalo con el médico.</div>';
+  h+='<div class="note bad"><b>Suelo pélvico, nunca durante la micción.</b> Cortar el chorro sirve para identificar el músculo la primera vez, no como entrenamiento. Si notas molestia perineal o urgencia urinaria, para una semana.</div>';
+
+  h+='<h3>Fases</h3><ul>';
+  h+='<li><b>Fase 0 · 26/10-1/11.</b> Herida de la cabeza y polisomnografía: fuerza ligera a 2 series y RIR 4.</li>';
+  h+='<li><b>Fase 1 · 2/11-29/11.</b> Base: 3 series, RIR 3 y luego 2. Zona 2, 2 × 30 min.</li>';
+  h+='<li><b>Fase 2 · 30/11-24/01.</b> Construcción: los cuatro primeros ejercicios a 4 series. Zona 2 de 40-45 min e intervalos 4×4 una vez por semana. Semana 8 de descarga.</li>';
+  h+='<li><b>Fase 3 · desde febrero de 2027.</b> Bloques de 8 semanas. Opción de 4 días si sueño y energía lo permiten.</li>';
+  h+='</ul>';
 
   if(mf){
     h+='<h3>Miofuncional · '+esc(MIO[mf].lbl)+'</h3>';
@@ -978,32 +1032,31 @@ function viewGuia(){
   }
 
   h+='<h3>Qué esperar y cuándo</h3><ul>';
-  h+='<li><b>Suelo pélvico.</b> 4-6 semanas: mejor control eyaculatorio. 8-12 semanas: erecciones más firmes. 3-6 meses: máximo.</li>';
-  h+='<li><b>Miofuncional.</b> Fase 1: 10-15% de mejoría percibida. Fase 2: 15-20%. Fase 3: 40-45%. Casi todo el beneficio está al final.</li>';
-  h+='<li><b>Movilidad.</b> La dosis óptima son unos 10 minutos por grupo muscular y semana. Acumular volumen, no sesiones épicas.</li>';
-  h+='<li><b>Cuello.</b> Evidencia sólida para dolor y postura funcional; débil para revertir la rectificación en radiografía. Objetivo realista: menos cefalea.</li>';
+  h+='<li><b>Energía y sueño.</b> La zona 2 y el sueño de lado mueven primero el ánimo, después la energía matutina.</li>';
+  h+='<li><b>Cuello y postura.</b> En 8-12 semanas, menos tensión de nuca. Evidencia sólida para dolor; débil para revertir la rectificación en la imagen.</li>';
+  h+='<li><b>Miofuncional.</b> Fase 1: 10-15% de mejoría percibida. Fase 2: 15-20%. Fase 3: 40-45%. Casi todo el beneficio llega al final.</li>';
   h+='</ul>';
 
   h+='<h3>Seguimientos médicos abiertos</h3><ul>';
-  h+='<li>Test de aliento de control del H. pylori, 4 semanas tras la última dosis del antibiótico.</li>';
-  h+='<li>Polisomnografía completa en laboratorio. La poligrafía domiciliaria negativa no descarta apnea leve ni resistencia de vía aérea superior.</li>';
-  h+='<li>Control evolutivo de la parotiditis izquierda.</li>';
-  h+='<li>Repetir transaminasas sin entrenar los 2-3 días previos a la extracción.</li>';
-  h+='<li>Rodilla izquierda, si la molestia persiste.</li>';
+  h+='<li>Polisomnografía: noche del jueves 29/10/2026, Hospital Cruz Roja de Córdoba.</li>';
+  h+='<li>Desde el 20/11: test de aliento de H. pylori y test de SIBO el mismo día.</li>';
+  h+='<li>Analítica tras 3 días sin entrenar: transaminasas, CK, TTPA y vitamina D.</li>';
+  h+='<li>Ecografía de control de la parotiditis izquierda.</li>';
+  h+='<li>Puntos del quiste: retirar a los 7-10 días. Nada de piscina hasta entonces.</li>';
   h+='</ul>';
 
-  h+='<h3>Suplementos durante la erradicación</h3><ul>';
-  h+='<li><b>Yovis</b> en ayunas, separado 2-3 h de cada toma de antibiótico.</li>';
-  h+='<li><b>Gelsectan</b> con desayuno y cena.</li>';
-  h+='<li><b>Vitamina D</b> con el desayuno, una sola fuente: Hidroferol mensual o bote diario, no ambos.</li>';
-  h+='<li><b>Magnesio</b> una hora antes de dormir.</li>';
-  h+='<li><b>Fuera por ahora:</b> Rhodiola y Mariendistel. El cardo mariano enmascararía la analítica de control de transaminasas.</li>';
+  h+='<h3>Suplementos ahora</h3><ul>';
+  h+='<li><b>Yovis</b> en ayunas y <b>Gelsectan</b> con desayuno y cena.</li>';
+  h+='<li><b>Hidroferol</b> mensual hasta diciembre. Aclarar con la internista si además hace falta la D3 diaria.</li>';
+  h+='<li><b>Magnesio y creatina</b> en pausa durante el plan de cuatro semanas.</li>';
+  h+='<li><b>Fuera:</b> Rhodiola y cardo mariano.</li>';
   h+='</ul>';
 
   h+='<h3>Medidas de entorno</h3><ul>';
-  h+='<li>Dormir de lado. Pelota de tenis cosida en la espalda del pijama si te giras.</li>';
+  h+='<li>Dormir de lado. Pelota de tenis cosida en la espalda de la camiseta si te giras.</li>';
   h+='<li>Cabecera elevada 10-15 cm.</li>';
   h+='<li>Fundas antiácaros en colchón y almohada, sábanas a 60 grados. Tienes IgE específica positiva a ambos dermatofagoides.</li>';
+  h+='<li>Pantallas fuera a las 21:30 y luces cálidas por la noche. Luz exterior por la mañana.</li>';
   h+='<li>Alcohol cero las noches importantes: relaja la musculatura faríngea.</li>';
   h+='<li>Respiración nasal consciente de día, boca cerrada y lengua en el paladar.</li>';
   h+='</ul>';
@@ -1019,7 +1072,7 @@ function openSession(plan){
   renderAll();
 }
 function sessionHTML(){
-  var e=ENT[sess.plan], ex=e.ex[sess.i];
+  var e=entOf(sess.plan,curDateKey()), ex=e.ex[sess.i];
   var s=st();
   var setsDone = s["sets_"+ex.id]||0;
   var pct=((sess.i)/e.ex.length)*100;
@@ -1067,7 +1120,7 @@ function sessionHTML(){
   }
   h+='</div>';
   h+='<div style="font-size:12px;color:var(--dim2)">Al marcar una serie arranca el descanso: '+
-     (ex.tipo==="comp"?"120 s en compuestos":"60 s en aislamiento")+'.</div>';
+     (ex.tipo==="comp"?"90 s, en superserie con el siguiente":"60 s")+'.</div>';
 
   h+='<button class="ghost" data-open="pain" data-painex="'+esc(ex.n)+'">Registrar molestia en este ejercicio</button>';
   h+='</div>';
@@ -1259,9 +1312,8 @@ function modalImport(){
    ============================================================ */
 function renderAll(){
   var B=buildDay(selDay), c=countDay(B);
-  var plan=cfg().plan[selDay];
-  var label = ENT[plan] ? ENT[plan].t+" · "+ENT[plan].sub
-            : (plan==="off" ? "Descanso · movilidad y cuello" : "Libre · mantenimiento");
+  var plan=resolvePlan(selDay);
+  var label = ENT[plan] ? ENT[plan].t+" · "+ENT[plan].sub : (PLAN_LBL[plan]||"Libre");
 
   document.getElementById("hday").textContent = DIAS[selDay];
   document.getElementById("hsub").textContent =
@@ -1336,23 +1388,23 @@ document.addEventListener("click",function(ev){
   if(g("data-sclose")){ saveCurrentSet(); sess=null; stopTimer(); return renderAll(); }
   if(g("data-snav")){
     saveCurrentSet();
-    var e=ENT[sess.plan], d=parseInt(g("data-snav"),10);
+    var e=entOf(sess.plan,curDateKey()), d=parseInt(g("data-snav"),10);
     if(sess.i+d<0){ return; }
     if(sess.i+d>=e.ex.length){ sess=null; stopTimer(); return renderAll(); }
     sess.i+=d; stopTimer(); window.scrollTo(0,0); return renderAll();
   }
   if(g("data-set")){
-    var n=parseInt(g("data-set"),10), ex2=ENT[sess.plan].ex[sess.i], s2=st();
+    var n=parseInt(g("data-set"),10), ex2=entOf(sess.plan,curDateKey()).ex[sess.i], s2=st();
     var cur=s2["sets_"+ex2.id]||0;
     s2["sets_"+ex2.id] = (cur===n ? n-1 : n);
     if(s2["sets_"+ex2.id]>=(ex2.sets||1)) s2["ex_"+ex2.id]=true;
     else s2["ex_"+ex2.id]=false;
     setSt(s2);
-    if(s2["sets_"+ex2.id]>cur) startTimer(ex2.tipo==="comp"?120:60,"Descanso · "+ex2.n);
+    if(s2["sets_"+ex2.id]>cur) startTimer(ex2.tipo==="comp"?90:60,"Descanso · "+ex2.n);
     return renderAll();
   }
   if(g("data-rpe")){
-    var ex3=ENT[sess.plan].ex[sess.i], s3=st();
+    var ex3=entOf(sess.plan,curDateKey()).ex[sess.i], s3=st();
     s3["rpe_"+ex3.id]=parseInt(g("data-rpe"),10); setSt(s3);
     return renderAll();
   }
@@ -1464,7 +1516,7 @@ function findItem(id){
 }
 function saveCurrentSet(){
   if(!sess) return;
-  var ex=ENT[sess.plan].ex[sess.i];
+  var ex=entOf(sess.plan,curDateKey()).ex[sess.i];
   if(!ex.w) return;
   var inp=document.getElementById("sw");
   var s=st();
