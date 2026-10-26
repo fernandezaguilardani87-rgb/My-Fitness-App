@@ -60,6 +60,13 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .ring .rv b{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
 .ring .rv span{font-size:10px;color:var(--dim2);font-weight:700;letter-spacing:.6px;text-transform:uppercase}
 
+.wnav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.wnav .wb{width:38px;height:38px;border-radius:13px;background:var(--card2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none}
+.wnav .wb:active{transform:scale(.92)}
+.wnav .wt{flex:1;text-align:center;line-height:1.2}
+.wnav .wt b{display:block;font-size:14px;font-weight:800}
+.wnav .wt span{font-size:12px;color:var(--dim2);font-weight:700}
+.wnav .wh{padding:9px 12px;border-radius:13px;background:color-mix(in srgb,var(--ac) 16%,transparent);color:var(--ac);font-size:12px;font-weight:800;flex:none}
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:18px}
 .wd{position:relative;padding:9px 0 10px;border-radius:16px;background:var(--card);border:1px solid var(--line);
   display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform .15s,background .2s}
@@ -325,7 +332,18 @@ function pad(n){ return (n<10?"0":"")+n; }
 function iso(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
 function today(){ return iso(now()); }
 function todayIdx(){ var g=now().getDay(); return g===0?6:g-1; }
-function dateOfIdx(i){ var d=now(); d.setHours(12,0,0,0); d.setDate(d.getDate()+(i-todayIdx())); return d; }
+var wOff=0;
+function dateOfIdx(i){ var d=now(); d.setHours(12,0,0,0); d.setDate(d.getDate()+(i-todayIdx())+7*wOff); return d; }
+function esHoyIdx(i){ return iso(dateOfIdx(i))===today(); }
+function wnavHTML(){
+  var a=dateOfIdx(0), b=dateOfIdx(6), bl=bloque(iso(b)), rel;
+  rel = wOff===0?"Esta semana":(wOff===1?"La semana que viene":(wOff===-1?"La semana pasada":(wOff>1?"Dentro de "+wOff+" semanas":"Hace "+(-wOff)+" semanas")));
+  var sub = bl.f0 ? "Fase 0" : "Bloque "+bl.b+" · semana "+bl.s+(bl.des?" · descarga":"");
+  return '<div class="wnav rise"><button class="wb" data-a="wprev" aria-label="Semana anterior">'+ic("left")+'</button>'+
+    '<div class="wt"><b>'+esc(rel)+'</b><span>'+a.getDate()+' '+MESES[a.getMonth()].slice(0,3)+' – '+b.getDate()+' '+MESES[b.getMonth()].slice(0,3)+' · '+esc(sub)+'</span></div>'+
+    (wOff!==0?'<button class="wh" data-a="whoy">Hoy</button>':'')+
+    '<button class="wb" data-a="wnext" aria-label="Semana siguiente">'+ic("right")+'</button></div>';
+}
 function daysBetween(a,b){ return Math.round((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/86400000); }
 function rd(k,f){ try{ var r=localStorage.getItem(k); return r?JSON.parse(r):f; }catch(e){ return f; } }
 function wr(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -718,14 +736,14 @@ function ringSVG(done,tot,size,stroke){
 
 function headerHTML(){
   var d=dateOfIdx(selDay), dk=iso(d), plan=planDe(selDay), T=TIPOS[plan], c=cuentaDia(selDay);
-  var esHoy=selDay===todayIdx();
+  var esHoy=esHoyIdx(selDay);
   var h='<div class="hero rise"><div><div class="eyebrow">'+(esHoy?"Hoy · ":"")+esc(fechaCorta(d))+'</div>'+
     '<h1>'+DIAS[selDay]+'</h1><div class="tag"><span class="dot"></span>'+esc(T.t+" · "+T.sub)+'</div></div>'+
     '<div class="ring">'+ringSVG(c.d,c.t,76,7)+'<div class="rv"><b>'+c.d+'/'+c.t+'</b><span>hecho</span></div></div></div>';
-  h+='<div class="week rise">';
+  h+=wnavHTML()+'<div class="week rise">';
   for(var i=0;i<7;i++){
     var di=dateOfIdx(i), p=planDe(i);
-    h+='<button class="wd'+(i===selDay?" on":"")+(i===todayIdx()?" hoy":"")+'" style="--c:'+TIPOS[p].col+'" data-a="day" data-v="'+i+'" aria-label="'+DIAS[i]+'">'+
+    h+='<button class="wd'+(i===selDay?" on":"")+(esHoyIdx(i)?" hoy":"")+'" style="--c:'+TIPOS[p].col+'" data-a="day" data-v="'+i+'" aria-label="'+DIAS[i]+'">'+
        '<span class="l">'+CORTO[i]+'</span><span class="n">'+di.getDate()+'</span><span class="d"></span></button>';
   }
   h+='</div>';
@@ -800,7 +818,7 @@ function viewHoy(){
   if(EVENTOS[dk]) h+='<div class="event rise"><div class="ico">'+ic("flag")+'</div><div><b>'+esc(EVENTOS[dk][0])+'</b><span>'+esc(EVENTOS[dk][1])+'</span></div></div>';
   h+=programaCard(dk);
   if(plan!=="off") h+=semCard(dk);
-  var hr=hourNow(), esHoy=selDay===todayIdx();
+  var hr=hourNow(), esHoy=esHoyIdx(selDay);
   bloquesDia(selDay).forEach(function(b){
     var nowB=esHoy && hr>=b.h0 && hr<b.h1;
     h+='<div class="blk rise'+(nowB?" now":"")+'" style="--c:'+b.c+'"><span class="bd"></span><div class="bh"><div><div class="bt">'+esc(b.t)+'</div>'+
@@ -813,7 +831,7 @@ function viewHoy(){
 }
 
 function viewSemana(){
-  var dk=iso(dateOfIdx(0)), h='<div class="sec-h rise">Semana</div><div class="sec-s rise">Del '+esc(fechaCorta(dateOfIdx(0)))+' al '+esc(fechaCorta(dateOfIdx(6)))+'</div>';
+  var dk=iso(dateOfIdx(0)), h='<div class="sec-h rise">Semana</div><div class="sec-s rise">El plan de cada día, con sus ejercicios</div>'+wnavHTML();
   h+=programaCard(iso(dateOfIdx(selDay)));
   for(var i=0;i<7;i++){
     var d=dateOfIdx(i), p=planDe(i), T=TIPOS[p], ddk=iso(d), F=flujo(p,ddk,"verde"), txt;
@@ -822,7 +840,7 @@ function viewSemana(){
     else if(p==="motor") txt=(F[0]&&F[0].type==="list"?"Intervalos 4×4":"Zona 2 de 30 min")+", cuello completo, paseo del granjero, core y movilidad.";
     else txt=exs.slice(0,3).join(" · ")+(exs.length>3?" y "+(exs.length-3)+" más":"");
     var ev=EVENTOS[ddk]?'<p style="color:var(--luz);font-weight:700">'+esc(EVENTOS[ddk][0])+'</p>':'';
-    h+='<button class="dayc rise'+(i===todayIdx()?" hoy":"")+'" style="--c:'+T.col+'" data-a="goday" data-v="'+i+'"><span class="bar"></span>'+
+    h+='<button class="dayc rise'+(esHoyIdx(i)?" hoy":"")+'" style="--c:'+T.col+'" data-a="goday" data-v="'+i+'"><span class="bar"></span>'+
        '<span class="dn"><b>'+CORTO[i]+'</b><span>'+d.getDate()+'</span></span><span class="dc"><b>'+esc(T.t)+
        (p!=="off"?' <span style="color:var(--dim2);font-weight:700">· '+esc(T.sub)+'</span>':'')+'</b><p>'+esc(txt)+'</p>'+ev+'</span></button>';
   }
@@ -991,6 +1009,8 @@ document.addEventListener("click",function(ev){
   var dk = sess?sess.dk:iso(dateOfIdx(selDay));
   if(a==="tab"){ view=v; anim=true; window.scrollTo(0,0); return render(); }
   if(a==="day"){ selDay=+v; anim=true; return render(); }
+  if(a==="wprev"||a==="wnext"){ wOff+=(a==="wnext"?1:-1); selDay=(wOff===0?todayIdx():0); anim=true; return render(); }
+  if(a==="whoy"){ wOff=0; selDay=todayIdx(); anim=true; return render(); }
   if(a==="goday"){ selDay=+v; view="hoy"; anim=true; window.scrollTo(0,0); return render(); }
   if(a==="sem"){ var s=st(dk); s.sem=v; setSt(dk,s); return render(); }
   if(a==="chk"||a==="schk"){ toggle(dk,k); return render(); }
@@ -1038,7 +1058,7 @@ document.addEventListener("change",function(ev){
 document.addEventListener("visibilitychange",function(){ if(!document.hidden){ if(TM) tickTM(); if(sess) wake(true); render(); } });
 
 /* al abrir un día nuevo, vuelve al día que toca */
-(function(){ var last=rd("last3",null); if(last!==today()){ wr("last3",today()); selDay=todayIdx(); } })();
+(function(){ var last=rd("last3",null); if(last!==today()){ wr("last3",today()); } wOff=0; selDay=todayIdx(); })();
 render();
 setInterval(function(){ if(!sess&&!TM&&view==="hoy") render(); },60000);
 </script>
